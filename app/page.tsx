@@ -1,0 +1,5 @@
+import RoleDashboard from '@/components/dashboard/RoleDashboard';
+
+export default function HomePage() {
+  return <RoleDashboard />;
+}
