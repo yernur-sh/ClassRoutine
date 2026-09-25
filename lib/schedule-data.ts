@@ -1,4 +1,4 @@
-// 8 «А» сыныбының апталық сабақ кестесі.
+// 8 «А» сыныбының апталық сабақ кестесі — суреттегі кесте бойынша.
 // ⚠️ Кесте сайт арқылы емес, ОСЫ ФАЙЛ арқылы ғана өзгертіледі.
 // Өзгерту үшін төмендегі WEEK_SCHEDULE нысанын түзетіңіз — сайт бірден жаңарады.
 
@@ -29,48 +29,54 @@ export const TEACHERS = {
 
 const T = TEACHERS;
 
-/** Апталық кесте — барлық күн бір жерде. */
+/** Апталық кесте — суреттегі 8 «А» кестесі, 5 оқу күні. */
 export const WEEK_SCHEDULE: Record<DayKey, Lesson[]> = {
+  // Дүйсенбі — суреттегі 1-блок: 7 сабақ
   monday: [
-    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Қазақ тілі', teacher: T.dana, room: '№204' },
-    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Алгебра', teacher: T.ainur, room: '№304' },
-    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
-    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Физика', teacher: T.bolat, room: '№311', notes: 'Зертханалық жұмыс' },
-    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Қазақстан тарихы', teacher: T.zhanna, room: '№210' },
-    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Дене шынықтыру', teacher: T.marat, room: 'Спортзал' },
-  ],
-  tuesday: [
-    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Геометрия', teacher: T.ainur, room: '№304' },
-    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Қазақ әдебиеті', teacher: T.dana, room: '№204' },
-    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Биология', teacher: T.aliya, room: '№308' },
-    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Информатика', teacher: T.aset, room: '№112', notes: 'Ноутбук алып келу' },
-    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Орыс тілі', teacher: T.zhanna, room: '№206' },
-    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Көркем еңбек', teacher: T.aliya, room: '№101' },
-  ],
-  wednesday: [
-    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Алгебра', teacher: T.ainur, room: '№304' },
-    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Химия', teacher: T.aliya, room: '№309' },
-    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
-    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'География', teacher: T.zhanna, room: '№212' },
-    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Қазақ тілі', teacher: T.dana, room: '№204' },
-    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Дене шынықтыру', teacher: T.marat, room: 'Спортзал' },
-    { lessonNumber: 7, time: '14:10 - 14:55', subject: 'Музыка', teacher: T.gulnar, room: '№103' },
-  ],
-  thursday: [
-    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Физика', teacher: T.bolat, room: '№311' },
-    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Геометрия', teacher: T.ainur, room: '№304' },
-    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Дүниежүзі тарихы', teacher: T.zhanna, room: '№210' },
-    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Орыс әдебиеті', teacher: T.zhanna, room: '№206' },
-    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Информатика', teacher: T.aset, room: '№112' },
-    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Биология', teacher: T.aliya, room: '№308' },
-  ],
-  friday: [
-    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Қазақ әдебиеті', teacher: T.dana, room: '№204' },
+    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
     { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Алгебра', teacher: T.ainur, room: '№304' },
     { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Химия', teacher: T.aliya, room: '№309' },
-    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
+    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Қазақстан тарихы', teacher: T.zhanna, room: '№210' },
     { lessonNumber: 5, time: '12:20 - 13:05', subject: 'География', teacher: T.zhanna, room: '№212' },
-    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Тәрбие сағаты', teacher: T.ainur, room: '№304', notes: 'Сынып жетекшісінің сағаты' },
+    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Қазақ тілі', teacher: T.dana, room: '№204' },
+    { lessonNumber: 7, time: '14:10 - 14:55', subject: 'Дене шынықтыру', teacher: T.marat, room: 'Спортзал' },
+  ],
+  // Сейсенбі — суреттегі 2-блок: 6 сабақ
+  tuesday: [
+    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Қазақ әдебиеті', teacher: T.dana, room: '№204' },
+    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Физика', teacher: T.bolat, room: '№311' },
+    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Орыс тілі', teacher: T.zhanna, room: '№206' },
+    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Геометрия', teacher: T.ainur, room: '№304' },
+    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
+    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'География', teacher: T.zhanna, room: '№212' },
+  ],
+  // Сәрсенбі — суреттегі 3-блок: 6 сабақ
+  wednesday: [
+    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Ағылшын тілі', teacher: T.gulnar, room: '№207' },
+    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Дене шынықтыру', teacher: T.marat, room: 'Спортзал' },
+    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Алгебра', teacher: T.ainur, room: '№304' },
+    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Дүниежүзі тарихы', teacher: T.zhanna, room: '№210' },
+    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Қазақ тілі', teacher: T.dana, room: '№204' },
+    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Қазақ әдебиеті', teacher: T.dana, room: '№204' },
+  ],
+  // Бейсенбі — суреттегі 4-блок: 7 сабақ
+  thursday: [
+    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Дене шынықтыру', teacher: T.marat, room: 'Спортзал' },
+    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Геометрия', teacher: T.ainur, room: '№304' },
+    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Орыс тілі', teacher: T.zhanna, room: '№206' },
+    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Информатика', teacher: T.aset, room: '№112' },
+    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Биология', teacher: T.aliya, room: '№308' },
+    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Химия', teacher: T.aliya, room: '№309' },
+    { lessonNumber: 7, time: '14:10 - 14:55', subject: 'Көркем еңбек', teacher: T.aliya, room: '№101' },
+  ],
+  // Жұма — суреттегі 5-блок: 6 сабақ
+  friday: [
+    { lessonNumber: 1, time: '08:30 - 09:15', subject: 'Қазақ әдебиеті', teacher: T.dana, room: '№204' },
+    { lessonNumber: 2, time: '09:25 - 10:10', subject: 'Биология', teacher: T.aliya, room: '№308' },
+    { lessonNumber: 3, time: '10:20 - 11:05', subject: 'Алгебра', teacher: T.ainur, room: '№304' },
+    { lessonNumber: 4, time: '11:25 - 12:10', subject: 'Қазақстан тарихы', teacher: T.zhanna, room: '№210' },
+    { lessonNumber: 5, time: '12:20 - 13:05', subject: 'Физика', teacher: T.bolat, room: '№311' },
+    { lessonNumber: 6, time: '13:15 - 14:00', subject: 'Орыс тілі', teacher: T.zhanna, room: '№206' },
   ],
   saturday: [],
 };
