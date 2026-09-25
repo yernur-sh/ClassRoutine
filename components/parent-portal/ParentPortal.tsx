@@ -10,8 +10,12 @@ import { Users, Send, MessageCircle } from 'lucide-react';
 
 export default function ParentPortal() {
   const { user, openAuth } = useApp();
-  const { data: messages, loading } = useCollection<Message>('parentMessages', 'createdAt', 'asc');
+  // Барлық хабарламаларды алып, тек ата-ана чатын (channel === 'parent') сүзу — Байланыс чатымен бір коллекция, бөлек арна
+  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc');
+  const messages = allMessages.filter((m) => m.channel === 'parent');
   const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,20 +24,30 @@ export default function ParentPortal() {
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !text.trim()) return;
+    if (!user || !text.trim() || sending) return;
     const content = text.trim();
     setText('');
-    await addDoc(collection(db, 'parentMessages'), {
-      senderId: user.id,
-      senderName: user.name,
-      senderRole: user.role,
-      content,
-      createdAt: Date.now(),
-    });
+    setError(null);
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        channel: 'parent',
+        senderId: user.id,
+        senderName: user.name,
+        senderRole: user.role,
+        content,
+        createdAt: Date.now(),
+      });
+    } catch (err: any) {
+      console.error('Ата-ана чаты жіберу қатесі', err);
+      setError(err?.message || 'Хабарлама жіберілмеді. Қайталап көріңіз.');
+      setText(content);
+    } finally {
+      setSending(false);
+    }
   };
 
   const isStudent = user?.role === 'student';
-  const canChat = !!user && !isStudent;
 
   return (
     <div className="space-y-6">
@@ -51,6 +65,10 @@ export default function ParentPortal() {
           — Байланыс бетіндегі сұрақ-жауап чаты сияқты.
         </p>
       </div>
+
+      {error && (
+        <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div>
+      )}
 
       <div className="card animate-fade-up flex h-[560px] flex-col overflow-hidden">
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -104,8 +122,9 @@ export default function ParentPortal() {
                 placeholder="Хабарлама жазыңыз…"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
+                disabled={sending}
               />
-              <button type="submit" className="btn-primary px-4" disabled={!text.trim()}>
+              <button type="submit" className="btn-primary px-4" disabled={!text.trim() || sending}>
                 <Send className="h-4 w-4" />
               </button>
             </>

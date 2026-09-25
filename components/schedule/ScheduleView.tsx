@@ -2,13 +2,7 @@
 
 import React from 'react';
 import { DAYS, subjectGradient } from '@/lib/config';
-import {
-  WEEK_SCHEDULE,
-  TOTAL_LESSONS,
-  SUBJECTS,
-  todayKey,
-  lessonsFor,
-} from '@/lib/schedule-data';
+import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
 import { CalendarDays, Clock, MapPin, Printer, Sun } from 'lucide-react';
 
@@ -28,14 +22,7 @@ export default function ScheduleView() {
         }
       />
 
-      {/* Қысқаша мәлімет */}
-      <section className="animate-fade-up flex flex-wrap items-center gap-2">
-        <span className="chip bg-sky-50 text-sky-700">Аптасына {TOTAL_LESSONS} сабақ</span>
-        <span className="chip bg-emerald-50 text-emerald-700">{SUBJECTS.length} пән</span>
-        <span className="chip bg-violet-50 text-violet-700">5 оқу күні</span>
-      </section>
-
-      {/* Барлық күн бір бетте */}
+      {/* Барлық күн бір бетте - сабақтар 08:00 басталады */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {DAYS.map((d, idx) => {
           const lessons = lessonsFor(d.key);
@@ -123,28 +110,6 @@ export default function ScheduleView() {
           );
         })}
       </div>
-
-      {/* Пәндер тізімі */}
-      <section className="card animate-fade-up p-5">
-        <h2 className="mb-3 text-sm font-bold text-slate-900">Апта бойы өтетін пәндер</h2>
-        <div className="flex flex-wrap gap-2">
-          {SUBJECTS.map((s) => {
-            const count = Object.values(WEEK_SCHEDULE)
-              .flat()
-              .filter((l) => l.subject === s).length;
-            return (
-              <span
-                key={s}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
-              >
-                <span className={`h-2 w-2 rounded-full bg-gradient-to-br ${subjectGradient(s)}`} />
-                {s}
-                <span className="text-[10px] font-bold text-slate-400">×{count}</span>
-              </span>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
