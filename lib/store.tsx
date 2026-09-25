@@ -183,7 +183,7 @@ export function useApp() {
   return ctx;
 }
 
-/** Firestore коллекциясын нақты уақытта тыңдайтын hook — жылдам, кэшпен. */
+/** Firestore коллекциясын нақты уақытта тыңдайтын hook — жылдам, кэшпен (hydration қатесіз). */
 export function useCollection<T extends { id: string }>(
   path: string,
   orderField?: string,
@@ -192,27 +192,27 @@ export function useCollection<T extends { id: string }>(
 ) {
   const cacheKey = `fs-cache:${path}:${orderField ?? ''}:${direction}:${limitCount ?? ''}`;
 
-  const [data, setData] = useState<T[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem(cacheKey);
-        if (raw) return JSON.parse(raw) as T[];
-      } catch {}
-    }
-    return [];
-  });
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem(cacheKey);
-        if (raw) return false; // кэш бар — бірден көрсету, loading жоқ
-      } catch {}
-    }
-    return true;
-  });
+  // Hydration қатесін болдырмау үшін бастапқы мән әрқашан [] / true — сервер мен клиентте бірдей.
+  // Кэштен оқу тек useEffect ішінде (client mount кейін) жасалады, сонда сервер-дегі "0" мен клиент-тегі "1" сәйкессіздігі болмайды.
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Mount кейін кэштен бірден көрсету — бет бірден жылдам ашылады, бірақ hydration-дан кейін
+    let hasCache = false;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as T[];
+        if (Array.isArray(parsed) && parsed.length) {
+          setData(parsed);
+          setLoading(false);
+          hasCache = true;
+        }
+      }
+    } catch {}
+
     const constraints: QueryConstraint[] = [];
     if (orderField) constraints.push(orderBy(orderField, direction));
     if (limitCount) constraints.push(fsLimit(limitCount));
@@ -225,7 +225,6 @@ export function useCollection<T extends { id: string }>(
       { includeMetadataChanges: true },
       (snap) => {
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[];
-        // Кэштен келсе де, серверден келсе де дереу көрсету — бос экран ұзақ тұрмайды
         setData(docs);
         setError(null);
         setLoading(false);
@@ -234,7 +233,6 @@ export function useCollection<T extends { id: string }>(
           if (docs.length) {
             localStorage.setItem(cacheKey, JSON.stringify(docs.slice(0, 50)));
           } else if (!snap.metadata.fromCache) {
-            // Сервер бос деп растаса кэшті тазалау
             localStorage.removeItem(cacheKey);
           }
         } catch {}
@@ -242,7 +240,8 @@ export function useCollection<T extends { id: string }>(
       (err) => {
         console.error('Firestore error', path, err);
         setError(err.message);
-        setLoading(false);
+        // Кэш бар болса loading-ді жасырмау — кэш көрсетіліп тұр
+        if (!hasCache) setLoading(false);
       }
     );
     return () => unsub();
