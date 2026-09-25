@@ -65,7 +65,7 @@ export default function Header() {
         {/* Логотип */}
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-sm font-black text-white shadow-md shadow-sky-200 transition-transform group-hover:scale-105">
-            7A
+            8A
           </span>
           <span className="hidden sm:block leading-tight">
             <span className="block text-base font-extrabold text-slate-900">ClassRoutine</span>

@@ -1,179 +1,117 @@
 'use client';
 
-import React, { useState } from 'react';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useRef, useState } from 'react';
+import { addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useApp, useCollection } from '@/lib/store';
-import { Consultation } from '@/lib/types';
-import { EmptyState, Loading, Modal, PageHeader, formatDate } from '@/components/ui';
-import { Users, CalendarPlus, Check, X, Loader2 } from 'lucide-react';
-
-const TIME_SLOTS = ['09:00 - 09:30', '13:00 - 13:30', '15:00 - 15:30', '17:00 - 17:30'];
-
-const STATUS: Record<Consultation['status'], { label: string; cls: string }> = {
-  pending: { label: 'Күтілуде', cls: 'bg-amber-50 text-amber-600' },
-  accepted: { label: 'Қабылданды', cls: 'bg-emerald-50 text-emerald-600' },
-  declined: { label: 'Қабылданбады', cls: 'bg-rose-50 text-rose-600' },
-  completed: { label: 'Өтті', cls: 'bg-slate-100 text-slate-500' },
-};
+import { Message } from '@/lib/types';
+import { Avatar, EmptyState, Loading, PageHeader, formatDateTime } from '@/components/ui';
+import { Users, Send, MessageCircle } from 'lucide-react';
 
 export default function ParentPortal() {
-  const { user, isTeacher, openAuth } = useApp();
-  const { data, loading } = useCollection<Consultation>('consultations', 'createdAt');
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({
-    teacherName: '',
-    topic: '',
-    date: '',
-    timeSlot: TIME_SLOTS[0],
-  });
+  const { user, openAuth } = useApp();
+  const { data: messages, loading } = useCollection<Message>('parentMessages', 'createdAt', 'asc');
+  const [text, setText] = useState('');
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const visible = isTeacher ? data : data.filter((c) => c.parentId === user?.id);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
 
-  const book = async (e: React.FormEvent) => {
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-    setBusy(true);
-    try {
-      await addDoc(collection(db, 'consultations'), {
-        parentId: user.id,
-        parentName: user.name,
-        studentName: user.studentName || '',
-        teacherName: form.teacherName.trim(),
-        topic: form.topic.trim(),
-        date: form.date,
-        timeSlot: form.timeSlot,
-        status: 'pending',
-        createdAt: Date.now(),
-      });
-      setForm({ ...form, topic: '', date: '' });
-      setOpen(false);
-    } finally {
-      setBusy(false);
-    }
+    if (!user || !text.trim()) return;
+    const content = text.trim();
+    setText('');
+    await addDoc(collection(db, 'parentMessages'), {
+      senderId: user.id,
+      senderName: user.name,
+      senderRole: user.role,
+      content,
+      createdAt: Date.now(),
+    });
   };
 
-  const setStatus = (id: string, status: Consultation['status']) =>
-    updateDoc(doc(db, 'consultations', id), { status });
+  const isStudent = user?.role === 'student';
+  const canChat = !!user && !isStudent;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Ата-аналар порталы"
-        subtitle="Мұғаліммен кездесуге жазылу және өтініштер"
+        title="Ата-ана чаты"
+        subtitle="Мұғаліммен тікелей байланыс — сұрақ қойып, жауап алыңыз"
         icon={<Users className="h-6 w-6" />}
-        action={
-          user ? (
-            user.role === 'parent' && (
-              <button onClick={() => setOpen(true)} className="btn-primary">
-                <CalendarPlus className="h-4 w-4" /> Кездесуге жазылу
-              </button>
-            )
-          ) : (
-            <button onClick={() => openAuth('login')} className="btn-primary">
-              Кіру
-            </button>
-          )
-        }
       />
 
-      {loading ? (
-        <Loading />
-      ) : visible.length === 0 ? (
-        <EmptyState
-          title="Өтініш жоқ"
-          description={
-            user?.role === 'parent'
-              ? 'Мұғаліммен кездесуге жазылыңыз — өтінішіңіз осында көрінеді.'
-              : 'Ата-аналар жазылған кезде өтініштер осында шығады.'
-          }
-        />
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2">
-          {visible.map((c, i) => (
-            <article key={c.id} className={`card card-hover animate-fade-up delay-${Math.min(i + 1, 4)} p-4`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="truncate font-bold text-slate-900">{c.topic}</h3>
-                  <p className="text-xs text-slate-500">
-                    {c.parentName}
-                    {c.studentName && ` · оқушы: ${c.studentName}`}
-                  </p>
-                </div>
-                <span className={`chip shrink-0 ${STATUS[c.status].cls}`}>{STATUS[c.status].label}</span>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="chip bg-sky-50 text-sky-600">{c.date}</span>
-                <span className="chip bg-slate-100 text-slate-600">{c.timeSlot}</span>
-                {c.teacherName && <span className="chip bg-violet-50 text-violet-600">{c.teacherName}</span>}
-              </div>
-              {isTeacher && c.status === 'pending' && (
-                <div className="mt-3 flex gap-2">
-                  <button onClick={() => setStatus(c.id, 'accepted')} className="btn-soft flex-1">
-                    <Check className="h-4 w-4" /> Қабылдау
-                  </button>
-                  <button onClick={() => setStatus(c.id, 'declined')} className="btn-danger flex-1">
-                    <X className="h-4 w-4" /> Бас тарту
-                  </button>
-                </div>
-              )}
-              <p className="mt-3 text-[11px] text-slate-400">Жіберілді: {formatDate(c.createdAt)}</p>
-            </article>
-          ))}
-        </div>
-      )}
+      {/* Сипаттама — Байланыс бетіндегідей түсіндірме */}
+      <div className="flex items-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-700">
+        <MessageCircle className="h-4 w-4 shrink-0" />
+        <p>
+          Бұл чат <b>тек ата-аналар мен мұғалімдерге</b> арналған. Хабарламалар нақты уақытта көрінеді
+          — Байланыс бетіндегі сұрақ-жауап чаты сияқты.
+        </p>
+      </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Кездесуге жазылу">
-        <form onSubmit={book} className="space-y-4">
-          <div>
-            <label className="label">Мұғалімнің аты-жөні</label>
-            <input
-              className="input"
-              value={form.teacherName}
-              onChange={(e) => setForm({ ...form, teacherName: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className="label">Тақырып</label>
-            <input
-              className="input"
-              value={form.topic}
-              onChange={(e) => setForm({ ...form, topic: e.target.value })}
-              placeholder="Баламның үлгерімі туралы"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">Күні</label>
+      <div className="card animate-fade-up flex h-[560px] flex-col overflow-hidden">
+        <div className="flex-1 space-y-3 overflow-y-auto p-4">
+          {loading ? (
+            <Loading />
+          ) : messages.length === 0 ? (
+            <EmptyState title="Хабарлама жоқ" description="Алғашқы хабарламаңызды жазыңыз — мұғалім осында жауап береді." />
+          ) : (
+            messages.map((m) => {
+              const own = m.senderId === user?.id;
+              return (
+                <div key={m.id} className={`flex animate-fade-in gap-2 ${own ? 'flex-row-reverse' : ''}`}>
+                  <Avatar name={m.senderName} />
+                  <div className={`max-w-[75%] ${own ? 'items-end text-right' : ''}`}>
+                    <p className="text-[11px] font-semibold text-slate-400">
+                      {m.senderName}
+                      {m.senderRole === 'teacher' && ' · мұғалім'}
+                      {m.senderRole === 'parent' && ' · ата-ана'}
+                    </p>
+                    <div
+                      className={`mt-0.5 inline-block rounded-2xl px-3.5 py-2 text-sm ${
+                        own
+                          ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-slate-300">{formatDateTime(m.createdAt)}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        <form onSubmit={send} className="flex gap-2 border-t border-slate-100 bg-white p-3">
+          {!user ? (
+            <button type="button" onClick={() => openAuth('login')} className="btn-soft w-full">
+              Жазу үшін жүйеге кіріңіз
+            </button>
+          ) : isStudent ? (
+            <div className="flex w-full items-center justify-center rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700">
+              Бұл чат тек ата-аналар мен мұғалімдерге арналған
+            </div>
+          ) : (
+            <>
               <input
-                type="date"
                 className="input"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                required
+                placeholder="Хабарлама жазыңыз…"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
               />
-            </div>
-            <div>
-              <label className="label">Уақыты</label>
-              <select
-                className="input"
-                value={form.timeSlot}
-                onChange={(e) => setForm({ ...form, timeSlot: e.target.value })}
-              >
-                {TIME_SLOTS.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button type="submit" className="btn-primary w-full" disabled={busy}>
-            {busy && <Loader2 className="h-4 w-4 animate-spin" />} Жіберу
-          </button>
+              <button type="submit" className="btn-primary px-4" disabled={!text.trim()}>
+                <Send className="h-4 w-4" />
+              </button>
+            </>
+          )}
         </form>
-      </Modal>
+      </div>
     </div>
   );
 }

@@ -6,8 +6,8 @@ import Footer from '@/components/layout/Footer';
 import AuthModal from '@/components/auth/AuthModal';
 
 export const metadata: Metadata = {
-  title: '7 «А» сынып порталы | ClassRoutine',
-  description: 'Сабақ кестесі, сынып хабарламалары, үй тапсырмасы және жетістіктер.',
+  title: '8 «А» сынып порталы | ClassRoutine',
+  description: 'Сабақ кестесі, сынып хабарламалары және жетістіктер.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
