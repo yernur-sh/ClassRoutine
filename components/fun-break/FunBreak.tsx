@@ -17,6 +17,24 @@ export default function FunBreak() {
     setRunning(false);
   }, [activeId, active.seconds]);
 
+  const playTick = () => {
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 600;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch {}
+  };
+
   const playAlarm = () => {
     try {
       const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
@@ -44,11 +62,13 @@ export default function FunBreak() {
   useEffect(() => {
     if (!running) return;
     timer.current = setInterval(() => {
+      // Жүріп жатқанда жеңіл тик-так дыбысы
+      playTick();
       setSeconds((s) => {
         if (s <= 1) {
           setRunning(false);
-          // Таймер біткенде дыбыс
-          playAlarm();
+          // Біткенде қатты сигнал
+          setTimeout(playAlarm, 150);
           return 0;
         }
         return s - 1;
@@ -139,7 +159,7 @@ export default function FunBreak() {
               </button>
             </div>
             <p className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-              <Volume2 className="h-3.5 w-3.5 text-sky-500" /> Таймер біткенде дыбыс ойнайды
+              <Volume2 className="h-3.5 w-3.5 text-sky-500" /> Таймер жүріп жатқанда тик-так, біткенде сигнал — отчет жазылмайды
             </p>
           </div>
 
