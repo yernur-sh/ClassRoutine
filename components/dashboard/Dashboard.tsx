@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
-import { Lesson, Announcement, Homework, Achievement } from '@/lib/types';
-import { DAYS, DayKey, CLASS_LABEL, subjectGradient } from '@/lib/config';
-import { EmptyState, Loading, formatDate } from '@/components/ui';
+import { Announcement, Homework, Achievement } from '@/lib/types';
+import { CLASS_LABEL, subjectGradient } from '@/lib/config';
+import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
+import { EmptyState, formatDate } from '@/components/ui';
+import MembersList from '@/components/dashboard/MembersList';
 import {
   CalendarDays,
   Megaphone,
@@ -15,30 +17,22 @@ import {
   Clock,
   MapPin,
   AlertCircle,
+  HeartHandshake,
+  Sparkles,
 } from 'lucide-react';
-
-const DAY_KEYS: DayKey[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-function todayKey(): DayKey | null {
-  const i = new Date().getDay(); // 0 = жексенбі
-  return i === 0 ? null : DAY_KEYS[i - 1];
-}
 
 export default function Dashboard() {
   const { user, openAuth, loading: authLoading } = useApp();
-  const { data: lessons, loading: lessonsLoading } = useCollection<Lesson>('lessons');
   const { data: announcements } = useCollection<Announcement>('announcements', 'createdAt');
   const { data: homework } = useCollection<Homework>('homework', 'createdAt');
   const { data: achievements } = useCollection<Achievement>('achievements', 'createdAt');
 
   const day = todayKey();
-  const todayLessons = lessons
-    .filter((l) => l.day === day)
-    .sort((a, b) => a.lessonNumber - b.lessonNumber);
-  const dayLabel = DAYS.find((d) => d.key === day)?.label || 'Демалыс күні';
+  const todayLessons = lessonsFor(day);
+  const label = dayLabel(day);
 
   const stats = [
-    { label: 'Апталық сабақ', value: lessons.length, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
+    { label: 'Апталық сабақ', value: TOTAL_LESSONS, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
     { label: 'Хабарлама', value: announcements.length, icon: Megaphone, color: 'from-amber-400 to-orange-500', href: '/communication' },
     { label: 'Үй тапсырмасы', value: homework.length, icon: BookOpen, color: 'from-emerald-400 to-teal-500', href: '/communication' },
     { label: 'Жетістік', value: achievements.length, icon: Trophy, color: 'from-violet-400 to-purple-500', href: '/achievements' },
@@ -56,11 +50,14 @@ export default function Dashboard() {
             {user ? `Сәлем, ${user.name.split(' ')[0]}!` : 'Сынып порталына қош келдіңіз'}
           </h1>
           <p className="mt-2 max-w-lg text-sm text-white/85 sm:text-base">
-            Сабақ кестесі, үй тапсырмасы, сынып хабарламалары және жетістіктер — бәрі бір жерде.
+            Сабақ кестесі, тәрбие сағаты, үй тапсырмасы, жетістіктер және ЖИ-көмекші — бәрі бір жерде.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/schedule" className="btn bg-white text-sky-600 hover:bg-sky-50">
               Кестені ашу <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/ai-assistant" className="btn bg-white/15 text-white hover:bg-white/25">
+              <Sparkles className="h-4 w-4" /> ЖИ-көмекші
             </Link>
             {!user && !authLoading && (
               <button onClick={() => openAuth('register')} className="btn bg-white/15 text-white hover:bg-white/25">
@@ -95,25 +92,23 @@ export default function Dashboard() {
         <section className="card animate-fade-up p-5 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <CalendarDays className="h-5 w-5 text-sky-500" /> Бүгін: {dayLabel}
+              <CalendarDays className="h-5 w-5 text-sky-500" /> Бүгін: {label}
             </h2>
             <Link href="/schedule" className="btn-soft h-8 text-xs">
               Толық кесте <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          {lessonsLoading ? (
-            <Loading />
-          ) : todayLessons.length === 0 ? (
+          {todayLessons.length === 0 ? (
             <EmptyState
-              title="Бүгінге сабақ енгізілмеген"
-              description="Сынып жетекшісі кестені толтырғаннан кейін осы жерде көрінеді."
+              title="Бүгін сабақ жоқ"
+              description="Демалыс күні. Апталық кестені «Толық кесте» бөлімінен қараңыз."
             />
           ) : (
             <ul className="space-y-2">
               {todayLessons.map((l, i) => (
                 <li
-                  key={l.id}
+                  key={l.lessonNumber}
                   className={`animate-fade-up delay-${Math.min(i + 1, 4)} flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm`}
                 >
                   <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(l.subject)} text-sm font-bold text-white`}>
@@ -174,6 +169,33 @@ export default function Dashboard() {
           )}
         </section>
       </div>
+
+      {/* Тіркелген оқушылар мен ата-аналар */}
+      <MembersList />
+
+      {/* Жылдам сілтемелер */}
+      <section className="grid gap-3 sm:grid-cols-2">
+        <Link href="/class-hour" className="card card-hover animate-fade-up flex items-center gap-4 p-5">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-sm">
+            <HeartHandshake className="h-6 w-6" />
+          </span>
+          <span className="min-w-0">
+            <span className="block font-bold text-slate-900">Тәрбие сағаты</span>
+            <span className="block text-xs text-slate-500">Апталық тақырып, жоспар және сынып ережелері</span>
+          </span>
+          <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400" />
+        </Link>
+        <Link href="/ai-assistant" className="card card-hover animate-fade-up delay-1 flex items-center gap-4 p-5">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 text-white shadow-sm">
+            <Sparkles className="h-6 w-6" />
+          </span>
+          <span className="min-w-0">
+            <span className="block font-bold text-slate-900">ЖИ-көмекші</span>
+            <span className="block text-xs text-slate-500">Кесте, сабақ және оқу туралы сұрақтарға жауап береді</span>
+          </span>
+          <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400" />
+        </Link>
+      </section>
     </div>
   );
 }

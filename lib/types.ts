@@ -1,4 +1,4 @@
-import type { DayKey } from './config';
+// Ескерту: сабақ кестесінің типі `lib/schedule-data.ts` файлында.
 
 export type UserRole = 'student' | 'teacher' | 'parent';
 
@@ -11,17 +11,6 @@ export interface UserProfile {
   studentName?: string; // ата-ана үшін: баласының аты
   isHomeroom?: boolean; // сынып жетекшісі ме
   createdAt?: number;
-}
-
-export interface Lesson {
-  id: string;
-  day: DayKey;
-  lessonNumber: number;
-  time: string;
-  subject: string;
-  teacher: string;
-  room: string;
-  notes?: string;
 }
 
 export interface Announcement {

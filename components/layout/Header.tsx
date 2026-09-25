@@ -17,11 +17,15 @@ import {
   X,
   LogOut,
   LogIn,
+  HeartHandshake,
+  Sparkles,
 } from 'lucide-react';
 
 const NAV = [
   { href: '/', label: 'Басты бет', icon: Home },
   { href: '/schedule', label: 'Кесте', icon: CalendarDays },
+  { href: '/class-hour', label: 'Тәрбие сағаты', icon: HeartHandshake },
+  { href: '/ai-assistant', label: 'ЖИ-көмекші', icon: Sparkles },
   { href: '/communication', label: 'Байланыс', icon: MessageSquare },
   { href: '/achievements', label: 'Жетістіктер', icon: Trophy },
   { href: '/parent-portal', label: 'Ата-ана', icon: Users },
@@ -76,14 +80,16 @@ export default function Header() {
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                title={label}
+                aria-label={label}
+                className={`flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold transition-all ${
                   active
                     ? 'bg-white text-sky-600 shadow-sm'
                     : 'text-slate-500 hover:bg-white/70 hover:text-slate-800'
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                {label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="hidden xl:inline">{label}</span>
               </Link>
             );
           })}

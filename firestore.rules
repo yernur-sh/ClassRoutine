@@ -26,11 +26,8 @@ service cloud.firestore {
       allow create, update: if request.auth.uid == uid;
     }
 
-    // Кесте — оқу тегін, өзгертуді тек мұғалім жасайды
-    match /lessons/{id} {
-      allow read: if true;
-      allow write: if isTeacher();
-    }
+    // ⚠️ Сабақ кестесі Firestore-да сақталмайды —
+    // ол `lib/schedule-data.ts` файлында код арқылы қойылған.
 
     // Сынып хабарламалары — тек сынып жетекшісі жариялайды
     match /announcements/{id} {

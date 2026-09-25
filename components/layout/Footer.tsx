@@ -14,6 +14,8 @@ export default function Footer() {
         </p>
         <div className="flex items-center gap-4">
           <Link href="/schedule" className="transition hover:text-sky-600">Кесте</Link>
+          <Link href="/class-hour" className="transition hover:text-sky-600">Тәрбие сағаты</Link>
+          <Link href="/ai-assistant" className="transition hover:text-sky-600">ЖИ-көмекші</Link>
           <Link href="/communication" className="transition hover:text-sky-600">Хабарламалар</Link>
           <span className="text-slate-300">© {new Date().getFullYear()}</span>
         </div>
