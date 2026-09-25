@@ -4,7 +4,7 @@ import React from 'react';
 import { DAYS, subjectGradient } from '@/lib/config';
 import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
-import { CalendarDays, Clock, MapPin, Printer, Sun } from 'lucide-react';
+import { CalendarDays, Clock, Printer, Sun } from 'lucide-react';
 
 export default function ScheduleView() {
   const today = todayKey();
@@ -79,7 +79,7 @@ export default function ScheduleView() {
                       <span
                         className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(
                           l.subject
-                        )} text-xs font-bold text-white`}
+                        )} text-xs font-black text-white shadow-md ring-1 ring-black/10 [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]`}
                       >
                         {l.lessonNumber}
                       </span>
@@ -96,11 +96,6 @@ export default function ScheduleView() {
                         <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
                           <Clock className="h-3 w-3" /> {l.time.split(' - ')[0]}
                         </p>
-                        {l.room && (
-                          <p className="mt-0.5 flex items-center justify-end gap-1">
-                            <MapPin className="h-3 w-3" /> {l.room}
-                          </p>
-                        )}
                       </div>
                     </li>
                   ))}
