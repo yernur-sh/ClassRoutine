@@ -4,7 +4,7 @@ import React from 'react';
 import { DAYS } from '@/lib/config';
 import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
-import { CalendarDays, Clock, Printer, Sun } from 'lucide-react';
+import { CalendarDays, Clock, Sun } from 'lucide-react';
 
 export default function ScheduleView() {
   const today = todayKey();
@@ -15,11 +15,6 @@ export default function ScheduleView() {
         title="Сабақ кестесі"
         subtitle="Апталық кестенің барлық күні — бір бетте"
         icon={<CalendarDays className="h-6 w-6" />}
-        action={
-          <button onClick={() => window.print()} className="btn-soft no-print">
-            <Printer className="h-4 w-4" /> Басып шығару
-          </button>
-        }
       />
 
       {/* Барлық күн бір бетте - сабақтар 08:00 басталады */}
@@ -30,15 +25,15 @@ export default function ScheduleView() {
           return (
             <section
               key={d.key}
-              className={`card animate-fade-up delay-${Math.min(idx + 1, 4)} overflow-hidden ${
-                isToday ? 'ring-2 ring-sky-400 ring-offset-2' : ''
+              className={`card animate-fade-up delay-${Math.min(idx + 1, 4)} overflow-hidden bg-gradient-to-br from-white to-violet-50/30 ${
+                isToday ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
               <header
                 className={`flex items-center justify-between gap-2 px-4 py-3 ${
                   isToday
-                    ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white'
-                    : 'border-b border-slate-100 bg-slate-50/70 text-slate-800'
+                    ? 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white'
+                    : 'border-b border-slate-100 bg-violet-50/40 text-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -76,7 +71,7 @@ export default function ScheduleView() {
                       key={`${d.key}-${l.lessonNumber}`}
                       className="flex items-start gap-3 px-4 py-3 transition hover:bg-sky-50/50"
                     >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 text-xs font-black text-white shadow-md">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-400 to-indigo-500 text-xs font-black text-white shadow-md">
                         {l.lessonNumber}
                       </span>
                       <div className="min-w-0 flex-1">
