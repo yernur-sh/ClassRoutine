@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration from environment or fallback placeholders
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDummyKeyForClassRoutineApp2026",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "class-routine-school.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "class-routine-school",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "class-routine-school.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789012:web:abcdef123456789",
+   apiKey: "AIzaSyBYF3eJvOPoh8dDEryIG8fI0pwtUHrcT-s",
+    authDomain: "classroutine-8bb0f.firebaseapp.com",
+    projectId: "classroutine-8bb0f",
+    storageBucket: "classroutine-8bb0f.firebasestorage.app",
+    messagingSenderId: "468100680383",
+    appId: "1:468100680383:web:40c35ce01c7c487f9b940a",
 };
 
 // Check if Firebase is running with actual valid API key
