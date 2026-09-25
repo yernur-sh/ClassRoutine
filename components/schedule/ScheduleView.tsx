@@ -10,7 +10,7 @@ import {
   lessonsFor,
 } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
-import { CalendarDays, Clock, MapPin, Printer, Info, Sun } from 'lucide-react';
+import { CalendarDays, Clock, MapPin, Printer, Sun } from 'lucide-react';
 
 export default function ScheduleView() {
   const today = todayKey();
@@ -33,9 +33,6 @@ export default function ScheduleView() {
         <span className="chip bg-sky-50 text-sky-700">Аптасына {TOTAL_LESSONS} сабақ</span>
         <span className="chip bg-emerald-50 text-emerald-700">{SUBJECTS.length} пән</span>
         <span className="chip bg-violet-50 text-violet-700">5 оқу күні</span>
-        <span className="chip bg-slate-100 text-slate-500">
-          <Info className="h-3 w-3" /> Кесте әкімшілік бекіткен, өзгермейді
-        </span>
       </section>
 
       {/* Барлық күн бір бетте */}

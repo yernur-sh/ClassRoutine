@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
-import { Announcement, Homework, Achievement } from '@/lib/types';
+import { Announcement, Achievement } from '@/lib/types';
 import { CLASS_LABEL, subjectGradient } from '@/lib/config';
 import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
@@ -11,7 +11,6 @@ import MembersList from '@/components/dashboard/MembersList';
 import {
   CalendarDays,
   Megaphone,
-  BookOpen,
   Trophy,
   ArrowRight,
   Clock,
@@ -24,7 +23,6 @@ import {
 export default function Dashboard() {
   const { user, openAuth, loading: authLoading } = useApp();
   const { data: announcements } = useCollection<Announcement>('announcements', 'createdAt');
-  const { data: homework } = useCollection<Homework>('homework', 'createdAt');
   const { data: achievements } = useCollection<Achievement>('achievements', 'createdAt');
 
   const day = todayKey();
@@ -34,7 +32,6 @@ export default function Dashboard() {
   const stats = [
     { label: 'Апталық сабақ', value: TOTAL_LESSONS, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
     { label: 'Хабарлама', value: announcements.length, icon: Megaphone, color: 'from-amber-400 to-orange-500', href: '/communication' },
-    { label: 'Үй тапсырмасы', value: homework.length, icon: BookOpen, color: 'from-emerald-400 to-teal-500', href: '/communication' },
     { label: 'Жетістік', value: achievements.length, icon: Trophy, color: 'from-violet-400 to-purple-500', href: '/achievements' },
   ];
 
@@ -50,7 +47,7 @@ export default function Dashboard() {
             {user ? `Сәлем, ${user.name.split(' ')[0]}!` : 'Сынып порталына қош келдіңіз'}
           </h1>
           <p className="mt-2 max-w-lg text-sm text-white/85 sm:text-base">
-            Сабақ кестесі, тәрбие сағаты, үй тапсырмасы, жетістіктер және ЖИ-көмекші — бәрі бір жерде.
+            Сабақ кестесі, тәрбие сағаты, жетістіктер және ЖИ-көмекші — бәрі бір жерде.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/schedule" className="btn bg-white text-sky-600 hover:bg-sky-50">
@@ -69,7 +66,7 @@ export default function Dashboard() {
       </section>
 
       {/* Статистика */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {stats.map((s, i) => (
           <Link
             key={s.label}

@@ -1,8 +1,8 @@
 // Сыныпқа қатысты негізгі баптаулар.
 // Мұғалім / сынып жетекші рөлі осы e-mail тізімі арқылы анықталады.
 
-export const CLASS_ID = '7-A';
-export const CLASS_LABEL = '7 «А» сыныбы';
+export const CLASS_ID = '8-A';
+export const CLASS_LABEL = '8 «А» сыныбы';
 export const SCHOOL_NAME = 'Мектеп-лицей';
 
 /** Сынып жетекшісінің e-mail-ы. Тек осы адам сынып хабарламасын жариялай алады. */
