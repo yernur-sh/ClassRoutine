@@ -95,7 +95,7 @@ export default function AiAssistant() {
               <Bot className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="font-bold">ClassRoutine көмекшісі</p>
+              <p className="font-bold">Сынып Әлемі көмекшісі</p>
               <p className="text-[11px] text-white/80">
                 {typing ? 'жазып жатыр…' : 'онлайн · сынып деректеріне қосылған'}
               </p>

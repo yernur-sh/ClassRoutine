@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
 import { Announcement, Achievement } from '@/lib/types';
-import { CLASS_LABEL, subjectGradient } from '@/lib/config';
+import { CLASS_LABEL } from '@/lib/config';
 import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
 import MembersList from '@/components/dashboard/MembersList';
@@ -14,7 +14,6 @@ import {
   Trophy,
   ArrowRight,
   Clock,
-  MapPin,
   AlertCircle,
   HeartHandshake,
   Sparkles,
@@ -108,7 +107,7 @@ export default function Dashboard() {
                   key={l.lessonNumber}
                   className={`animate-fade-up delay-${Math.min(i + 1, 4)} flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm`}
                 >
-                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(l.subject)} text-sm font-bold text-white`}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-sky-100 bg-white text-sm font-black text-sky-600 shadow-sm">
                     {l.lessonNumber}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -119,11 +118,6 @@ export default function Dashboard() {
                     <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
                       <Clock className="h-3.5 w-3.5" /> {l.time}
                     </p>
-                    {l.room && (
-                      <p className="flex items-center justify-end gap-1">
-                        <MapPin className="h-3 w-3" /> {l.room}
-                      </p>
-                    )}
                   </div>
                 </li>
               ))}
