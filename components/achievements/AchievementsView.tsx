@@ -11,7 +11,8 @@ import { Trophy, Plus, Trash2, Loader2, Medal } from 'lucide-react';
 
 export default function AchievementsView() {
   const { user, isTeacher } = useApp();
-  const { data, loading } = useCollection<Achievement>('achievements', 'createdAt');
+  // limit 40 — кэшпен бірден, желі баяу болса да skeleton қысқа
+  const { data, loading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 40);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -67,8 +68,12 @@ export default function AchievementsView() {
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Жетістіктер тізімі */}
         <div className="space-y-4 lg:col-span-2">
-          {loading ? (
-            <Loading />
+          {loading && data.length === 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-32 animate-pulse rounded-3xl bg-slate-100" />
+              ))}
+            </div>
           ) : data.length === 0 ? (
             <EmptyState
               title="Жетістік жоқ"
