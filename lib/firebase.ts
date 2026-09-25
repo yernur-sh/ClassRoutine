@@ -1,39 +1,17 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
-// Firebase configuration from environment or fallback placeholders
 const firebaseConfig = {
-   apiKey: "AIzaSyBYF3eJvOPoh8dDEryIG8fI0pwtUHrcT-s",
-    authDomain: "classroutine-8bb0f.firebaseapp.com",
-    projectId: "classroutine-8bb0f",
-    storageBucket: "classroutine-8bb0f.firebasestorage.app",
-    messagingSenderId: "468100680383",
-    appId: "1:468100680383:web:40c35ce01c7c487f9b940a",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBYF3eJvOPoh8dDEryIG8fI0pwtUHrcT-s',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'classroutine-8bb0f.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'classroutine-8bb0f',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'classroutine-8bb0f.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '468100680383',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:468100680383:web:40c35ce01c7c487f9b940a',
 };
 
-// Check if Firebase is running with actual valid API key
-export const isFirebaseConfigured = () => {
-  return (
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== undefined &&
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== "" &&
-    !process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes("Dummy")
-  );
-};
-
-// Initialize Firebase app safely
-let app;
-let auth: any = null;
-let db: any = null;
-let googleProvider: any = null;
-
-try {
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  googleProvider = new GoogleAuthProvider();
-} catch (error) {
-  console.warn("Firebase initialization notice: Running in local reactive state mode.", error);
-}
-
-export { app, auth, db, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut };
+export const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const auth: Auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();

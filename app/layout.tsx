@@ -6,21 +6,17 @@ import Footer from '@/components/layout/Footer';
 import AuthModal from '@/components/auth/AuthModal';
 
 export const metadata: Metadata = {
-  title: '7 «А» Сынып Порталы | ClassRoutine',
-  description: 'Мектеп сыныбына арналған сабақ кестесі, мұғалім мен оқушы байланысы, жетістіктер тақтасы, ата-аналар порталы және көңілді үзіліс жаттығулары.',
+  title: '7 «А» сынып порталы | ClassRoutine',
+  description: 'Сабақ кестесі, сынып хабарламалары, үй тапсырмасы және жетістіктер.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="kk">
-      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+      <body className="flex min-h-screen flex-col bg-slate-50 text-slate-800">
         <AppProvider>
           <Header />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             {children}
           </main>
           <Footer />

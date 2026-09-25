@@ -1,5 +1,5 @@
-import TeacherStudentHub from '@/components/communication/TeacherStudentHub';
+import CommunicationHub from '@/components/communication/CommunicationHub';
 
 export default function CommunicationPage() {
-  return <TeacherStudentHub />;
+  return <CommunicationHub />;
 }

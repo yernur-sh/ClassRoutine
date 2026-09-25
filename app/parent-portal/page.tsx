@@ -1,5 +1,5 @@
-import ParentTeacherPortal from '@/components/parent-portal/ParentTeacherPortal';
+import ParentPortal from '@/components/parent-portal/ParentPortal';
 
 export default function ParentPortalPage() {
-  return <ParentTeacherPortal />;
+  return <ParentPortal />;
 }

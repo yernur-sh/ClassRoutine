@@ -1,0 +1,74 @@
+rules_version = '2';
+
+// Firebase Console → Firestore → Rules бөліміне осы ережелерді қойыңыз.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isTeacher() {
+      return signedIn() && userDoc().role == 'teacher';
+    }
+
+    function isHomeroom() {
+      return signedIn() && userDoc().isHomeroom == true;
+    }
+
+    // Профильдер
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if request.auth.uid == uid;
+    }
+
+    // Кесте — оқу тегін, өзгертуді тек мұғалім жасайды
+    match /lessons/{id} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // Сынып хабарламалары — тек сынып жетекшісі жариялайды
+    match /announcements/{id} {
+      allow read: if true;
+      allow create: if isHomeroom();
+      allow update, delete: if isHomeroom() && resource.data.authorId == request.auth.uid;
+    }
+
+    // Үй тапсырмасы
+    match /homework/{id} {
+      allow read: if true;
+      allow write: if isTeacher();
+
+      match /submissions/{studentId} {
+        allow read: if signedIn();
+        allow create, update: if request.auth.uid == studentId || isTeacher();
+        allow delete: if isTeacher();
+      }
+    }
+
+    // Жетістіктер
+    match /achievements/{id} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // Чат
+    match /messages/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isTeacher();
+    }
+
+    // Ата-ана кездесулері
+    match /consultations/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.parentId == request.auth.uid;
+      allow update: if isTeacher() || resource.data.parentId == request.auth.uid;
+    }
+  }
+}
