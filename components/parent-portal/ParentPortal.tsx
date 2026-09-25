@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase';
 import { useApp, useCollection } from '@/lib/store';
 import { Message } from '@/lib/types';
 import { Avatar, EmptyState, Loading, PageHeader, formatDateTime } from '@/components/ui';
-import { Users, Send, MessageCircle } from 'lucide-react';
+import { Users, Send } from 'lucide-react';
 
 export default function ParentPortal() {
   const { user, openAuth } = useApp();
@@ -56,15 +56,6 @@ export default function ParentPortal() {
         subtitle="Мұғаліммен тікелей байланыс — сұрақ қойып, жауап алыңыз"
         icon={<Users className="h-6 w-6" />}
       />
-
-      {/* Сипаттама — Байланыс бетіндегідей түсіндірме */}
-      <div className="flex items-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-700">
-        <MessageCircle className="h-4 w-4 shrink-0" />
-        <p>
-          Бұл чат <b>тек ата-аналар мен мұғалімдерге</b> арналған. Хабарламалар нақты уақытта көрінеді
-          — Байланыс бетіндегі сұрақ-жауап чаты сияқты.
-        </p>
-      </div>
 
       {error && (
         <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div>

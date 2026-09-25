@@ -107,7 +107,7 @@ export default function Dashboard() {
                   key={l.lessonNumber}
                   className={`animate-fade-up delay-${Math.min(i + 1, 4)} flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm`}
                 >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-sky-100 bg-white text-sm font-black text-sky-600 shadow-sm">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-sky-200 bg-sky-50 text-sm font-black text-sky-400 shadow-sm">
                     {l.lessonNumber}
                   </span>
                   <div className="min-w-0 flex-1">
