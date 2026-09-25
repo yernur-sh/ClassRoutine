@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BREAK_EXERCISES } from '@/lib/config';
 import { PageHeader } from '@/components/ui';
-import { Smile, Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Smile, Play, Pause, RotateCcw } from 'lucide-react';
 
 export default function FunBreak() {
   const [activeId, setActiveId] = useState(BREAK_EXERCISES[0].id);
@@ -16,24 +16,6 @@ export default function FunBreak() {
     setSeconds(active.seconds);
     setRunning(false);
   }, [activeId, active.seconds]);
-
-  const playTick = () => {
-    try {
-      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 600;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.12);
-    } catch {}
-  };
 
   const playAlarm = () => {
     try {
@@ -62,13 +44,10 @@ export default function FunBreak() {
   useEffect(() => {
     if (!running) return;
     timer.current = setInterval(() => {
-      // Жүріп жатқанда жеңіл тик-так дыбысы
-      playTick();
       setSeconds((s) => {
         if (s <= 1) {
           setRunning(false);
-          // Біткенде қатты сигнал
-          setTimeout(playAlarm, 150);
+          playAlarm();
           return 0;
         }
         return s - 1;
@@ -158,9 +137,7 @@ export default function FunBreak() {
                 <RotateCcw className="h-4 w-4" /> Қайта
               </button>
             </div>
-            <p className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-              <Volume2 className="h-3.5 w-3.5 text-sky-500" /> Таймер жүріп жатқанда тик-так, біткенде сигнал — отчет жазылмайды
-            </p>
+
           </div>
 
           <div>
