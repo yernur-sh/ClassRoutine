@@ -190,8 +190,11 @@ function Announcements({ canPost }: { canPost: boolean }) {
 
 function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
   const { user } = useApp();
-  const { data: messages, loading } = useCollection<Message>('messages', 'createdAt', 'asc');
+  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc');
+  // Тек жалпы чат хабарламалары (ата-ана чаты бөлек, channel === 'parent' көрсетілмейді)
+  const messages = allMessages.filter((m) => m.channel !== 'parent');
   const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,17 +203,25 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !text.trim()) return;
+    if (!user || !text.trim() || sending) return;
     const content = text.trim();
     setText('');
-    await addDoc(collection(db, 'messages'), {
-      channel: 'general',
-      senderId: user.id,
-      senderName: user.name,
-      senderRole: user.role,
-      content,
-      createdAt: Date.now(),
-    });
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        channel: 'general',
+        senderId: user.id,
+        senderName: user.name,
+        senderRole: user.role,
+        content,
+        createdAt: Date.now(),
+      });
+    } catch (err) {
+      console.error('Чат жіберу қатесі', err);
+      setText(content);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -257,8 +268,9 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
               placeholder="Хабарлама жазыңыз…"
               value={text}
               onChange={(e) => setText(e.target.value)}
+              disabled={sending}
             />
-            <button type="submit" className="btn-primary px-4" disabled={!text.trim()}>
+            <button type="submit" className="btn-primary px-4" disabled={!text.trim() || sending}>
               <Send className="h-4 w-4" />
             </button>
           </>
