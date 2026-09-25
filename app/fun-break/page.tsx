@@ -1,5 +1,5 @@
-import FunBreakHub from '@/components/fun-break/FunBreakHub';
+import FunBreak from '@/components/fun-break/FunBreak';
 
 export default function FunBreakPage() {
-  return <FunBreakHub />;
+  return <FunBreak />;
 }
