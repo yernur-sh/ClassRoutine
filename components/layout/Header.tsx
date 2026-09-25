@@ -17,6 +17,7 @@ import {
   X,
   LogOut,
   LogIn,
+  UserPlus,
   HeartHandshake,
   Sparkles,
 } from 'lucide-react';
@@ -132,9 +133,14 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <button onClick={() => openAuth('login')} className="btn-primary h-10">
-              <LogIn className="h-4 w-4" /> Кіру
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => openAuth('login')} className="btn-ghost h-10">
+                <LogIn className="h-4 w-4" /> Кіру
+              </button>
+              <button onClick={() => openAuth('register')} className="btn-primary h-10">
+                <UserPlus className="h-4 w-4" /> Тіркелу
+              </button>
+            </div>
           )}
 
           <button

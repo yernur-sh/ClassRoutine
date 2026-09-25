@@ -76,7 +76,7 @@ export default function ScheduleView() {
                       key={`${d.key}-${l.lessonNumber}`}
                       className="flex items-start gap-3 px-4 py-3 transition hover:bg-sky-50/50"
                     >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border-2 border-sky-100 bg-white text-xs font-black text-sky-600 shadow-sm">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-black text-sky-400 shadow-sm">
                         {l.lessonNumber}
                       </span>
                       <div className="min-w-0 flex-1">

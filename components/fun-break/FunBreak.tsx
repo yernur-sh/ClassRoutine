@@ -41,7 +41,7 @@ export default function FunBreak() {
     <div className="space-y-6">
       <PageHeader
         title="Көңілді үзіліс"
-        subtitle="Сабақ арасында 1–2 минут сергіп алыңыз"
+        subtitle="Сабақ арасында 10 минут сергіп алыңыз"
         icon={<Smile className="h-6 w-6" />}
       />
 
@@ -61,7 +61,7 @@ export default function FunBreak() {
             </span>
             <span className="min-w-0">
               <span className="block truncate font-bold text-slate-800">{ex.title}</span>
-              <span className="block text-xs text-slate-500">{ex.seconds} секунд</span>
+              <span className="block text-xs text-slate-500">10 минут</span>
             </span>
           </button>
         ))}
