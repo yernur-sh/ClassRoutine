@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { DAYS, subjectGradient } from '@/lib/config';
+import { DAYS } from '@/lib/config';
 import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
 import { CalendarDays, Clock, Printer, Sun } from 'lucide-react';
@@ -76,16 +76,11 @@ export default function ScheduleView() {
                       key={`${d.key}-${l.lessonNumber}`}
                       className="flex items-start gap-3 px-4 py-3 transition hover:bg-sky-50/50"
                     >
-                      <span
-                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(
-                          l.subject
-                        )} text-xs font-black text-white shadow-md ring-1 ring-black/10 [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]`}
-                      >
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border-2 border-sky-100 bg-white text-xs font-black text-sky-600 shadow-sm">
                         {l.lessonNumber}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-slate-900">{l.subject}</p>
-                        <p className="truncate text-xs text-slate-500">{l.teacher}</p>
                         {l.notes && (
                           <p className="mt-1.5 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
                             {l.notes}
