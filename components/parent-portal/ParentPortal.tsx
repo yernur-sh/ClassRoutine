@@ -49,6 +49,35 @@ export default function ParentPortal() {
 
   const isStudent = user?.role === 'student';
 
+  if (!user) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Ата-ана чаты"
+          subtitle="Мұғаліммен тікелей байланыс — сұрақ қойып, жауап алыңыз"
+          icon={<Users className="h-6 w-6" />}
+        />
+        <div className="card animate-fade-up flex h-[400px] flex-col items-center justify-center p-8 text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+            <Users className="h-8 w-8" />
+          </div>
+          <h3 className="mt-4 text-lg font-bold text-slate-800">Чат тек тіркелгендерге арналған</h3>
+          <p className="mt-2 max-w-sm text-sm text-slate-500">
+            Мұғаліммен чатты көру және жазу үшін жүйеге кіріңіз немесе тіркеліңіз. Тек ата-аналар мен мұғалімдер жаза алады.
+          </p>
+          <div className="mt-5 flex gap-2">
+            <button onClick={() => openAuth('login')} className="btn-primary">
+              Кіру
+            </button>
+            <button onClick={() => openAuth('register')} className="btn-ghost">
+              Тіркелу
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
