@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import AuthModal from '@/components/auth/AuthModal';
 
 export const metadata: Metadata = {
-  title: '8 «А» сынып порталы | Сынып Әлемі',
+  title: '8 «А» сынып порталы | SynypKz',
   description: 'Сабақ кестесі, сынып хабарламалары және жетістіктер.',
 };
 

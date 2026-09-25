@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BREAK_EXERCISES } from '@/lib/config';
 import { PageHeader } from '@/components/ui';
-import { Smile, Play, Pause, RotateCcw } from 'lucide-react';
+import { Smile, Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 
 export default function FunBreak() {
   const [activeId, setActiveId] = useState(BREAK_EXERCISES[0].id);
@@ -17,12 +17,38 @@ export default function FunBreak() {
     setRunning(false);
   }, [activeId, active.seconds]);
 
+  const playAlarm = () => {
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const beep = (freq: number, delay: number, dur: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+        osc.start(t);
+        osc.stop(t + dur);
+      };
+      beep(880, 0, 0.5);
+      beep(880, 0.3, 0.5);
+      beep(1100, 0.6, 0.8);
+    } catch {}
+  };
+
   useEffect(() => {
     if (!running) return;
     timer.current = setInterval(() => {
       setSeconds((s) => {
         if (s <= 1) {
           setRunning(false);
+          // Таймер біткенде дыбыс
+          playAlarm();
           return 0;
         }
         return s - 1;
@@ -112,6 +138,9 @@ export default function FunBreak() {
                 <RotateCcw className="h-4 w-4" /> Қайта
               </button>
             </div>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+              <Volume2 className="h-3.5 w-3.5 text-sky-500" /> Таймер біткенде дыбыс ойнайды
+            </p>
           </div>
 
           <div>

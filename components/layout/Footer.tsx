@@ -10,7 +10,7 @@ export default function Footer() {
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 text-[10px] font-black text-white">
             8A
           </span>
-          Сынып Әлемі — {CLASS_LABEL}
+          SynypKz — {CLASS_LABEL}
         </p>
         <div className="flex items-center gap-4">
           <Link href="/schedule" className="transition hover:text-sky-600">Кесте</Link>

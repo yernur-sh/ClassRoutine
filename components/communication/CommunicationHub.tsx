@@ -197,6 +197,28 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  if (!user) {
+    return (
+      <div className="card animate-fade-up flex h-[400px] flex-col items-center justify-center p-8 text-center">
+        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+          <MessageSquare className="h-8 w-8" />
+        </div>
+        <h3 className="mt-4 text-lg font-bold text-slate-800">Чат тек тіркелгендерге арналған</h3>
+        <p className="mt-2 max-w-sm text-sm text-slate-500">
+          Сынып чатын көру және хабарлама жазу үшін жүйеге кіріңіз немесе тіркеліңіз.
+        </p>
+        <div className="mt-5 flex gap-2">
+          <button onClick={onNeedAuth} className="btn-primary">
+            Кіру
+          </button>
+          <button onClick={onNeedAuth} className="btn-ghost">
+            Тіркелу
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);

@@ -69,7 +69,7 @@ export default function Header() {
             8A
           </span>
           <span className="hidden sm:block leading-tight">
-            <span className="block text-base font-extrabold text-slate-900">Сынып Әлемі</span>
+            <span className="block text-base font-extrabold text-slate-900">SynypKz</span>
             <span className="block text-[11px] font-medium text-slate-400">{CLASS_LABEL}</span>
           </span>
         </Link>
