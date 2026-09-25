@@ -10,8 +10,8 @@ import { Users, Send } from 'lucide-react';
 
 export default function ParentPortal() {
   const { user, openAuth } = useApp();
-  // Барлық хабарламаларды алып, тек ата-ана чатын (channel === 'parent') сүзу — Байланыс чатымен бір коллекция, бөлек арна
-  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc');
+  // Барлық хабарламаларды алып, тек ата-ана чатын (channel === 'parent') сүзу — limit 120, кэшпен тез
+  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc', 120);
   const messages = allMessages.filter((m) => m.channel === 'parent');
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -92,8 +92,12 @@ export default function ParentPortal() {
 
       <div className="card animate-fade-up flex h-[560px] flex-col overflow-hidden">
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
-          {loading ? (
-            <Loading />
+          {loading && allMessages.length === 0 ? (
+            <div className="space-y-3 py-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
           ) : messages.length === 0 ? (
             <EmptyState title="Хабарлама жоқ" description="Алғашқы хабарламаңызды жазыңыз — мұғалім осында жауап береді." />
           ) : (

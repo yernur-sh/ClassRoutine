@@ -25,6 +25,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit as fsLimit,
   QueryConstraint,
 } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
@@ -70,8 +71,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!fbUser) {
         setUser(null);
         setLoading(false);
+        try {
+          localStorage.removeItem('synypkz-user');
+        } catch {}
         return;
       }
+      // Алдымен кэштен бірден көрсету (0мс) — бет бірден ашылады
+      try {
+        const cached = localStorage.getItem('synypkz-user');
+        if (cached) {
+          const parsed = JSON.parse(cached) as UserProfile;
+          if (parsed.id === fbUser.uid) {
+            setUser(parsed);
+            setLoading(false);
+          }
+        }
+      } catch {}
       const ref = doc(db, 'users', fbUser.uid);
       let snap = await getDoc(ref);
       if (!snap.exists()) {
@@ -87,8 +102,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
         await setDoc(ref, profile);
         setUser(profile);
+        try {
+          localStorage.setItem('synypkz-user', JSON.stringify(profile));
+        } catch {}
       } else {
-        setUser({ id: fbUser.uid, ...(snap.data() as Omit<UserProfile, 'id'>) });
+        const profile = { id: fbUser.uid, ...(snap.data() as Omit<UserProfile, 'id'>) } as UserProfile;
+        setUser(profile);
+        try {
+          localStorage.setItem('synypkz-user', JSON.stringify(profile));
+        } catch {}
       }
       setLoading(false);
     });
@@ -161,27 +183,61 @@ export function useApp() {
   return ctx;
 }
 
-/** Firestore коллекциясын нақты уақытта тыңдайтын hook. */
+/** Firestore коллекциясын нақты уақытта тыңдайтын hook — жылдам, кэшпен. */
 export function useCollection<T extends { id: string }>(
   path: string,
   orderField?: string,
-  direction: 'asc' | 'desc' = 'desc'
+  direction: 'asc' | 'desc' = 'desc',
+  limitCount?: number
 ) {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `fs-cache:${path}:${orderField ?? ''}:${direction}:${limitCount ?? ''}`;
+
+  const [data, setData] = useState<T[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(cacheKey);
+        if (raw) return JSON.parse(raw) as T[];
+      } catch {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(cacheKey);
+        if (raw) return false; // кэш бар — бірден көрсету, loading жоқ
+      } catch {}
+    }
+    return true;
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const constraints: QueryConstraint[] = orderField
-      ? [orderBy(orderField, direction)]
-      : [];
+    const constraints: QueryConstraint[] = [];
+    if (orderField) constraints.push(orderBy(orderField, direction));
+    if (limitCount) constraints.push(fsLimit(limitCount));
+
     const q = query(collection(db, path), ...constraints);
+
+    // includeMetadataChanges: кэштен келгенде бірден (0-100мс) хабарлайды, сосын серверден жаңартады
     const unsub = onSnapshot(
       q,
+      { includeMetadataChanges: true },
       (snap) => {
-        setData(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[]);
-        setLoading(false);
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[];
+        // Кэштен келсе де, серверден келсе де дереу көрсету — бос экран ұзақ тұрмайды
+        setData(docs);
         setError(null);
+        setLoading(false);
+        // Келесі ашу үшін localStorage-қа сақтау (жылдам іске қосу)
+        try {
+          if (docs.length) {
+            localStorage.setItem(cacheKey, JSON.stringify(docs.slice(0, 50)));
+          } else if (!snap.metadata.fromCache) {
+            // Сервер бос деп растаса кэшті тазалау
+            localStorage.removeItem(cacheKey);
+          }
+        } catch {}
       },
       (err) => {
         console.error('Firestore error', path, err);
@@ -190,7 +246,7 @@ export function useCollection<T extends { id: string }>(
       }
     );
     return () => unsub();
-  }, [path, orderField, direction]);
+  }, [path, orderField, direction, limitCount, cacheKey]);
 
   return { data, loading, error };
 }

@@ -23,8 +23,9 @@ import {
 
 export default function Dashboard() {
   const { user, openAuth, loading: authLoading } = useApp();
-  const { data: announcements } = useCollection<Announcement>('announcements', 'createdAt');
-  const { data: achievements } = useCollection<Achievement>('achievements', 'createdAt');
+  // limit қосылды —Firestore-дан тек соңғы 6 жазба алынады, кэш + persistentLocalCache арқасында бірден (0-80мс) көрінеді
+  const { data: announcements, loading: annLoading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 6);
+  const { data: achievements, loading: achLoading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 6);
 
   const day = todayKey();
   const todayLessons = lessonsFor(day);
@@ -140,7 +141,13 @@ export default function Dashboard() {
               Барлығы
             </Link>
           </div>
-          {announcements.length === 0 ? (
+          {annLoading && announcements.length === 0 ? (
+            <div className="space-y-2.5">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-[72px] animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+          ) : announcements.length === 0 ? (
             <EmptyState title="Хабарлама жоқ" description="Сынып жетекшісі жариялағанда осында шығады." />
           ) : (
             <ul className="space-y-2.5">

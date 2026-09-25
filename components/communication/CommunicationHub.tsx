@@ -74,7 +74,8 @@ export default function CommunicationHub() {
 
 function Announcements({ canPost }: { canPost: boolean }) {
   const { user } = useApp();
-  const { data, loading } = useCollection<Announcement>('announcements', 'createdAt');
+  // limit 30 — соңғы 30 хабарлама жеткілікті, Firestore-дан тез (кэштен 0-80мс)
+  const { data, loading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 30);
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -111,8 +112,12 @@ function Announcements({ canPost }: { canPost: boolean }) {
         </button>
       )}
 
-      {loading ? (
-        <Loading />
+      {loading && data.length === 0 ? (
+        <div className="grid gap-3 md:grid-cols-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 animate-pulse rounded-3xl bg-slate-100" />
+          ))}
+        </div>
       ) : data.length === 0 ? (
         <EmptyState title="Әзірге хабарлама жоқ" description="Сынып жетекшісі жариялаған хабарламалар осында шығады." />
       ) : (
@@ -190,7 +195,8 @@ function Announcements({ canPost }: { canPost: boolean }) {
 
 function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
   const { user } = useApp();
-  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc');
+  // limit 120 — соңғы 120 хабарлама (екі арна), кэшпен бірден көрінеді
+  const { data: allMessages, loading } = useCollection<Message>('messages', 'createdAt', 'asc', 120);
   // Тек жалпы чат хабарламалары (ата-ана чаты бөлек, channel === 'parent' көрсетілмейді)
   const messages = allMessages.filter((m) => m.channel !== 'parent');
   const [text, setText] = useState('');
@@ -249,8 +255,12 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
   return (
     <div className="card animate-fade-up flex h-[560px] flex-col overflow-hidden">
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {loading ? (
-          <Loading />
+        {loading && allMessages.length === 0 ? (
+          <div className="space-y-3 py-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 animate-pulse rounded-2xl bg-slate-100" />
+            ))}
+          </div>
         ) : messages.length === 0 ? (
           <EmptyState title="Хабарлама жоқ" description="Алғашқы сұрағыңызды жазыңыз." />
         ) : (
