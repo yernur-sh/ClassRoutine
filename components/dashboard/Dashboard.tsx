@@ -17,6 +17,8 @@ import {
   AlertCircle,
   HeartHandshake,
   Sparkles,
+  UserRound,
+  MapPin,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -107,12 +109,20 @@ export default function Dashboard() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-slate-800">{l.subject}</p>
-                    <p className="truncate text-xs text-slate-500">{l.teacher}</p>
+                    <p className="flex flex-wrap items-center gap-2 truncate text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <UserRound className="h-3 w-3 shrink-0" /> {l.teacher}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0" /> {l.room}
+                      </span>
+                    </p>
                   </div>
                   <div className="shrink-0 text-right text-xs text-slate-500">
                     <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
-                      <Clock className="h-3.5 w-3.5" /> {l.time}
+                      <Clock className="h-3.5 w-3.5" /> {l.time.split(' - ')[0]}
                     </p>
+                    <p className="text-[10px] text-slate-400">{l.time.split(' - ')[1]} дейін</p>
                   </div>
                 </li>
               ))}

@@ -4,7 +4,7 @@ import React from 'react';
 import { DAYS, subjectGradient } from '@/lib/config';
 import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
-import { CalendarDays, Clock, Sun } from 'lucide-react';
+import { CalendarDays, Clock, Sun, UserRound, MapPin } from 'lucide-react';
 
 export default function ScheduleView() {
   const today = todayKey();
@@ -76,6 +76,14 @@ export default function ScheduleView() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-slate-900">{l.subject}</p>
+                        <p className="mt-1 flex flex-wrap items-center gap-2 text-[11px] leading-none text-slate-500">
+                          <span className="inline-flex items-center gap-1">
+                            <UserRound className="h-3 w-3 shrink-0 text-slate-400" /> {l.teacher}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3 shrink-0 text-slate-400" /> {l.room}
+                          </span>
+                        </p>
                         {l.notes && (
                           <p className="mt-1.5 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
                             {l.notes}
@@ -86,6 +94,7 @@ export default function ScheduleView() {
                         <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
                           <Clock className="h-3 w-3" /> {l.time.split(' - ')[0]}
                         </p>
+                        <p className="mt-1 hidden text-[10px] text-slate-400 sm:block">{l.time.split(' - ')[1]} дейін</p>
                       </div>
                     </li>
                   ))}
