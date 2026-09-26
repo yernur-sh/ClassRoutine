@@ -62,6 +62,7 @@ export interface Message {
   senderRole: UserRole;
   content: string;
   createdAt: number;
+  editedAt?: number;
 }
 
 export interface Consultation {
