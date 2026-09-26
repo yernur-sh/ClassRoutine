@@ -16,36 +16,47 @@ interface Provider {
   headers?: Record<string, string>;
 }
 
+/**
+ * Кілттің шынымен қойылғанын тексеру.
+ * Үлгі мәтін («МҰНДА_ӨЗ_КІЛТІҢІЗДІ...»), бос жол немесе тым қысқа мән кілт саналмайды.
+ */
+function key(name: string): string | null {
+  const v = (process.env[name] || '').trim();
+  if (!v || v.length < 20) return null;
+  if (/МҰНДА|ӨЗ_КІЛТ|your[-_ ]?key|xxx|\.\.\./i.test(v)) return null;
+  return v;
+}
+
 /** Қолжетімді провайдерді env айнымалылары бойынша табу. */
 function resolveProvider(): Provider | null {
   const model = process.env.AI_MODEL;
 
-  if (process.env.OPENAI_API_KEY) {
+  if (key('OPENAI_API_KEY')) {
     return {
       url: (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1') + '/chat/completions',
-      key: process.env.OPENAI_API_KEY,
+      key: key('OPENAI_API_KEY')!,
       model: model || 'gpt-4o-mini',
     };
   }
-  if (process.env.OPENROUTER_API_KEY) {
+  if (key('OPENROUTER_API_KEY')) {
     return {
       url: 'https://openrouter.ai/api/v1/chat/completions',
-      key: process.env.OPENROUTER_API_KEY,
+      key: key('OPENROUTER_API_KEY')!,
       model: model || 'openai/gpt-4o-mini',
       headers: { 'X-Title': 'SynypKz' },
     };
   }
-  if (process.env.GROQ_API_KEY) {
+  if (key('GROQ_API_KEY')) {
     return {
       url: 'https://api.groq.com/openai/v1/chat/completions',
-      key: process.env.GROQ_API_KEY,
+      key: key('GROQ_API_KEY')!,
       model: model || 'llama-3.3-70b-versatile',
     };
   }
-  if (process.env.GEMINI_API_KEY) {
+  if (key('GEMINI_API_KEY')) {
     return {
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-      key: process.env.GEMINI_API_KEY,
+      key: key('GEMINI_API_KEY')!,
       model: model || 'gemini-2.0-flash',
     };
   }

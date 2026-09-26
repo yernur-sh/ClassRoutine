@@ -46,6 +46,7 @@ export default function AiAssistant() {
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const [offline, setOffline] = useState(false);
+  const [offlineReason, setOfflineReason] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -95,6 +96,7 @@ export default function AiAssistant() {
           ),
       });
       setOffline(res.mode === 'offline');
+      setOfflineReason(res.mode === 'offline' ? res.reason ?? null : null);
     } catch {
       /* тоқтатылды */
     } finally {
@@ -129,9 +131,26 @@ export default function AiAssistant() {
       />
 
       {offline && (
-        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-medium text-amber-800">
-          <WifiOff className="h-4 w-4 shrink-0" />
-          ЖИ қызметіне қосылу мүмкін болмады — көмекші қазір сынып деректері негізіндегі офлайн режимде жауап беруде.
+        <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-medium leading-relaxed text-amber-800">
+          <WifiOff className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            {offlineReason === 'no_provider' ? (
+              <>
+                <b>ЖИ кілті бапталмаған.</b> Көмекші қазір сынып деректері негізіндегі офлайн режимде
+                жауап беруде. Толық жасанды интеллектіні қосу үшін жоба түбінде{' '}
+                <code className="rounded bg-amber-100 px-1">.env.local</code> файлын жасап, кілт
+                қосыңыз (мыс. <code className="rounded bg-amber-100 px-1">GROQ_API_KEY=...</code>) және
+                серверді қайта іске қосыңыз. Нұсқаулық — README «ЖИ-көмекшіні қосу» бөлімінде.
+              </>
+            ) : offlineReason === 'upstream_error' ? (
+              <>
+                <b>ЖИ қызметі жауап бермеді</b> (кілт қате немесе лимит бітуі мүмкін) — көмекші офлайн
+                режимде жауап беруде.
+              </>
+            ) : (
+              <>Интернет байланысы үзілді — көмекші офлайн режимде жауап беруде.</>
+            )}
+          </span>
         </div>
       )}
 

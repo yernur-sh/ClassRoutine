@@ -20,7 +20,13 @@ export interface AskOptions {
   onDelta: (chunk: string) => void;
 }
 
-export type AskResult = { mode: 'ai' | 'offline' | 'blocked'; text: string };
+export type OfflineReason = 'no_provider' | 'upstream_error' | 'network' | null;
+
+export type AskResult = {
+  mode: 'ai' | 'offline' | 'blocked';
+  text: string;
+  reason?: OfflineReason;
+};
 
 export async function askAssistant(opts: AskOptions): Promise<AskResult> {
   const lastUser = [...opts.messages].reverse().find((m) => m.role === 'user');
@@ -45,7 +51,18 @@ export async function askAssistant(opts: AskOptions): Promise<AskResult> {
       signal: opts.signal,
     });
 
-    if (!res.ok || !res.body) throw new Error('ai_unavailable');
+    if (!res.ok || !res.body) {
+      let reason: OfflineReason = 'upstream_error';
+      try {
+        const j = await res.json();
+        if (j?.error === 'no_provider') reason = 'no_provider';
+      } catch {
+        /* ignore */
+      }
+      const text = offlineAnswer(question);
+      opts.onDelta(text);
+      return { mode: 'offline', text, reason };
+    }
 
     const reader = res.body.getReader();
     const dec = new TextDecoder();
@@ -80,6 +97,6 @@ export async function askAssistant(opts: AskOptions): Promise<AskResult> {
     // Fallback — сынып деректері негізіндегі офлайн жауап
     const text = offlineAnswer(question);
     opts.onDelta(text);
-    return { mode: 'offline', text };
+    return { mode: 'offline', text, reason: 'network' };
   }
 }
