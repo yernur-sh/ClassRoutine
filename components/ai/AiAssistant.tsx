@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/lib/store';
 import { QUICK_PROMPTS, type ChatMessage } from '@/lib/assistant';
 import { askAssistant } from '@/lib/ai-client';
+import { latexToReadable } from '@/lib/math-text';
 import { PageHeader, Avatar } from '@/components/ui';
 import { Sparkles, Send, Bot, RotateCcw, Lightbulb, ShieldCheck, Square, WifiOff } from 'lucide-react';
 
@@ -11,23 +12,50 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-/** Қарапайым мәтін безендіру: **қалың**, жол ауысу, • тізім. */
+/** Формула тәрізді жол ма? (мәтіні аз, математикалық белгілері көп) */
+function isFormulaLine(line: string): boolean {
+  const t = line.trim();
+  if (t.length < 3 || t.length > 90) return false;
+  if (/^[•\-\d]/.test(t) && !/=/.test(t)) return false;
+  const letters = (t.match(/[A-Za-zА-Яа-яӘәҒғҚқҢңӨөҰұҮүҺһІі]/g) || []).length;
+  const math = (t.match(/[=+\-×·÷√²³⁴ⁿ₀₁₂₃₄₅₆₇₈₉^/()<>≤≥≠±∛πΔ]/g) || []).length;
+  return /=/.test(t) && math >= 3 && letters <= t.length * 0.45;
+}
+
+/** Мәтінді безендіру: LaTeX → оқылатын түр, **қалың**, тізім, формула блогы. */
 function Rich({ text }: { text: string }) {
+  const clean = latexToReadable(text);
   return (
     <>
-      {text.split('\n').map((line, i) => (
-        <p key={i} className={line.startsWith('•') || /^\d+\./.test(line) ? 'pl-1' : ''}>
-          {line.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
-            part.startsWith('**') && part.endsWith('**') ? (
-              <strong key={j} className="font-bold">
-                {part.slice(2, -2)}
-              </strong>
-            ) : (
-              <span key={j}>{part}</span>
-            )
-          )}
-        </p>
-      ))}
+      {clean.split('\n').map((line, i) => {
+        if (!line.trim()) return <div key={i} className="h-1.5" />;
+
+        if (isFormulaLine(line)) {
+          return (
+            <p
+              key={i}
+              className="my-1 rounded-xl bg-slate-50 px-3 py-2 text-center font-mono text-[13px] font-semibold text-slate-800 ring-1 ring-slate-100"
+            >
+              {line.trim()}
+            </p>
+          );
+        }
+
+        const isList = /^\s*(•|[-*]\s|\d+[).]\s)/.test(line);
+        return (
+          <p key={i} className={isList ? 'pl-2' : ''}>
+            {line.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
+              part.startsWith('**') && part.endsWith('**') ? (
+                <strong key={j} className="font-bold text-slate-900">
+                  {part.slice(2, -2)}
+                </strong>
+              ) : (
+                <span key={j}>{part}</span>
+              )
+            )}
+          </p>
+        );
+      })}
     </>
   );
 }
