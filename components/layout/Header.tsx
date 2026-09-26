@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/lib/store';
 import { CLASS_LABEL } from '@/lib/config';
+import { canAccess } from '@/lib/access';
 import { Avatar } from '@/components/ui';
 import {
   Home,
@@ -42,6 +43,7 @@ const ROLE_LABEL: Record<string, string> = {
 export default function Header() {
   const pathname = usePathname();
   const { user, loading, openAuth, logout } = useApp();
+  const nav = NAV.filter((item) => canAccess(user?.role, item.href));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -75,7 +77,7 @@ export default function Header() {
 
         {/* Desktop навигация */}
         <nav className="mx-auto hidden items-center gap-1 rounded-2xl bg-slate-100/70 p-1 lg:flex">
-          {NAV.map(({ href, label, icon: Icon }) => {
+          {nav.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
               <Link
@@ -156,7 +158,7 @@ export default function Header() {
       {mobileOpen && (
         <nav className="animate-fade-in border-t border-slate-100 bg-white px-4 py-3 lg:hidden">
           <div className="grid grid-cols-2 gap-2">
-            {NAV.map(({ href, label, icon: Icon }) => {
+            {nav.map(({ href, label, icon: Icon }) => {
               const active = pathname === href;
               return (
                 <Link

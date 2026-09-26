@@ -8,6 +8,7 @@ import { CLASS_LABEL, subjectGradient } from '@/lib/config';
 import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
 import MembersList from '@/components/dashboard/MembersList';
+import { canAccess } from '@/lib/access';
 import {
   CalendarDays,
   Megaphone,
@@ -27,13 +28,15 @@ export default function Dashboard() {
   const { data: announcements, loading: annLoading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 6);
   const { data: achievements, loading: achLoading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 6);
 
+  const canChat = canAccess(user?.role, '/communication');
+
   const day = todayKey();
   const todayLessons = lessonsFor(day);
   const label = dayLabel(day);
 
   const stats = [
     { label: 'Апталық сабақ', value: TOTAL_LESSONS, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
-    { label: 'Хабарлама', value: announcements.length, icon: Megaphone, color: 'from-amber-400 to-orange-500', href: '/communication' },
+    { label: 'Хабарлама', value: announcements.length, icon: Megaphone, color: 'from-amber-400 to-orange-500', href: canChat ? '/communication' : null },
     { label: 'Жетістік', value: achievements.length, icon: Trophy, color: 'from-violet-400 to-purple-500', href: '/achievements' },
   ];
 
@@ -64,21 +67,25 @@ export default function Dashboard() {
 
       {/* Статистика */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        {stats.map((s, i) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className={`card card-hover animate-fade-up delay-${i + 1} flex items-center gap-3 p-4`}
-          >
-            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${s.color} text-white shadow-sm`}>
-              <s.icon className="h-5 w-5" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-xl font-extrabold text-slate-900">{s.value}</span>
-              <span className="block truncate text-xs font-medium text-slate-500">{s.label}</span>
-            </span>
-          </Link>
-        ))}
+        {stats.map((s, i) => {
+          const Wrapper: any = s.href ? Link : 'div';
+          const wrapperProps = s.href ? { href: s.href } : {};
+          return (
+            <Wrapper
+              key={s.label}
+              {...wrapperProps}
+              className={`card ${s.href ? 'card-hover' : ''} animate-fade-up delay-${i + 1} flex items-center gap-3 p-4`}
+            >
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${s.color} text-white shadow-sm`}>
+                <s.icon className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xl font-extrabold text-slate-900">{s.value}</span>
+                <span className="block truncate text-xs font-medium text-slate-500">{s.label}</span>
+              </span>
+            </Wrapper>
+          );
+        })}
       </section>
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -137,9 +144,11 @@ export default function Dashboard() {
             <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <Megaphone className="h-5 w-5 text-amber-500" /> Хабарламалар
             </h2>
-            <Link href="/communication" className="btn-soft h-8 text-xs">
-              Барлығы
-            </Link>
+            {canChat && (
+              <Link href="/communication" className="btn-soft h-8 text-xs">
+                Барлығы
+              </Link>
+            )}
           </div>
           {annLoading && announcements.length === 0 ? (
             <div className="space-y-2.5">
@@ -151,7 +160,7 @@ export default function Dashboard() {
             <EmptyState title="Хабарлама жоқ" description="Сынып жетекшісі жариялағанда осында шығады." />
           ) : (
             <ul className="space-y-2.5">
-              {announcements.slice(0, 4).map((a) => (
+              {announcements.slice(0, canChat ? 4 : 6).map((a) => (
                 <li
                   key={a.id}
                   className="rounded-2xl border border-slate-100 p-3 transition hover:border-amber-200 hover:bg-amber-50/40"
