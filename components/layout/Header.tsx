@@ -23,16 +23,15 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-// `short` — экран тар болғанда көрсетілетін қысқа атау.
 const NAV = [
-  { href: '/', label: 'Басты бет', short: 'Басты', icon: Home },
-  { href: '/schedule', label: 'Кесте', short: 'Кесте', icon: CalendarDays },
-  { href: '/communication', label: 'Байланыс', short: 'Байланыс', icon: MessageSquare },
-  { href: '/achievements', label: 'Жетістіктер', short: 'Жетістік', icon: Trophy },
-  { href: '/parent-portal', label: 'Ата-ана', short: 'Ата-ана', icon: Users },
-  { href: '/class-hour', label: 'Тәрбие сағаты', short: 'Тәрбие', icon: HeartHandshake },
-  { href: '/ai-assistant', label: 'ЖИ-көмекші', short: 'ЖИ-көмекші', icon: Sparkles },
-  { href: '/fun-break', label: 'Үзіліс', short: 'Үзіліс', icon: Smile },
+  { href: '/', label: 'Басты бет', icon: Home },
+  { href: '/schedule', label: 'Кесте', icon: CalendarDays },
+  { href: '/class-hour', label: 'Тәрбие сағаты', icon: HeartHandshake },
+  { href: '/ai-assistant', label: 'ЖИ-көмекші', icon: Sparkles },
+  { href: '/communication', label: 'Байланыс', icon: MessageSquare },
+  { href: '/achievements', label: 'Жетістіктер', icon: Trophy },
+  { href: '/parent-portal', label: 'Ата-ана', icon: Users },
+  { href: '/fun-break', label: 'Үзіліс', icon: Smile },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -77,13 +76,8 @@ export default function Header() {
         </Link>
 
         {/* Desktop навигация */}
-<<<<<<< HEAD
-        <nav className="no-scrollbar mx-auto hidden min-w-0 items-center gap-0.5 overflow-x-auto rounded-2xl bg-slate-100/70 p-1 lg:flex">
-          {NAV.map(({ href, label, short, icon: Icon }) => {
-=======
         <nav className="mx-auto hidden items-center gap-1 rounded-2xl bg-slate-100/70 p-1 lg:flex">
           {nav.map(({ href, label, icon: Icon }) => {
->>>>>>> origin/arena/01a0dc84-classroutine
             const active = pathname === href;
             return (
               <Link
@@ -91,14 +85,14 @@ export default function Header() {
                 href={href}
                 title={label}
                 aria-label={label}
-                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 py-2 text-[13px] font-semibold leading-none transition-all ${
+                className={`flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold transition-all ${
                   active
                     ? 'bg-white text-sky-600 shadow-sm'
                     : 'text-slate-500 hover:bg-white/70 hover:text-slate-800'
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="hidden whitespace-nowrap xl:inline">{short}</span>
+                <span className="hidden xl:inline">{label}</span>
               </Link>
             );
           })}
@@ -174,8 +168,8 @@ export default function Header() {
                     active ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{label}</span>
+                  <Icon className="h-4 w-4" />
+                  {label}
                 </Link>
               );
             })}
