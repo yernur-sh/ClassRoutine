@@ -17,6 +17,7 @@ import {
   X,
   LogOut,
   LogIn,
+  UserPlus,
   HeartHandshake,
   Sparkles,
 } from 'lucide-react';
@@ -64,10 +65,10 @@ export default function Header() {
         {/* Логотип */}
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-sm font-black text-white shadow-md shadow-sky-200 transition-transform group-hover:scale-105">
-            7A
+            8A
           </span>
           <span className="hidden sm:block leading-tight">
-            <span className="block text-base font-extrabold text-slate-900">ClassRoutine</span>
+            <span className="block text-base font-extrabold text-slate-900">SynypKz</span>
             <span className="block text-[11px] font-medium text-slate-400">{CLASS_LABEL}</span>
           </span>
         </Link>
@@ -131,9 +132,14 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <button onClick={() => openAuth('login')} className="btn-primary h-10">
-              <LogIn className="h-4 w-4" /> Кіру
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => openAuth('login')} className="btn-ghost h-10">
+                <LogIn className="h-4 w-4" /> Кіру
+              </button>
+              <button onClick={() => openAuth('register')} className="btn-primary h-10">
+                <UserPlus className="h-4 w-4" /> Тіркелу
+              </button>
+            </div>
           )}
 
           <button

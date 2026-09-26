@@ -2,15 +2,9 @@
 
 import React from 'react';
 import { DAYS, subjectGradient } from '@/lib/config';
-import {
-  WEEK_SCHEDULE,
-  TOTAL_LESSONS,
-  SUBJECTS,
-  todayKey,
-  lessonsFor,
-} from '@/lib/schedule-data';
+import { todayKey, lessonsFor } from '@/lib/schedule-data';
 import { PageHeader } from '@/components/ui';
-import { CalendarDays, Clock, MapPin, Printer, Info, Sun } from 'lucide-react';
+import { CalendarDays, Clock, Sun, UserRound, MapPin } from 'lucide-react';
 
 export default function ScheduleView() {
   const today = todayKey();
@@ -21,24 +15,9 @@ export default function ScheduleView() {
         title="Сабақ кестесі"
         subtitle="Апталық кестенің барлық күні — бір бетте"
         icon={<CalendarDays className="h-6 w-6" />}
-        action={
-          <button onClick={() => window.print()} className="btn-soft no-print">
-            <Printer className="h-4 w-4" /> Басып шығару
-          </button>
-        }
       />
 
-      {/* Қысқаша мәлімет */}
-      <section className="animate-fade-up flex flex-wrap items-center gap-2">
-        <span className="chip bg-sky-50 text-sky-700">Аптасына {TOTAL_LESSONS} сабақ</span>
-        <span className="chip bg-emerald-50 text-emerald-700">{SUBJECTS.length} пән</span>
-        <span className="chip bg-violet-50 text-violet-700">5 оқу күні</span>
-        <span className="chip bg-slate-100 text-slate-500">
-          <Info className="h-3 w-3" /> Кесте әкімшілік бекіткен, өзгермейді
-        </span>
-      </section>
-
-      {/* Барлық күн бір бетте */}
+      {/* Барлық күн бір бетте - сабақтар 08:00 басталады */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {DAYS.map((d, idx) => {
           const lessons = lessonsFor(d.key);
@@ -46,15 +25,15 @@ export default function ScheduleView() {
           return (
             <section
               key={d.key}
-              className={`card animate-fade-up delay-${Math.min(idx + 1, 4)} overflow-hidden ${
-                isToday ? 'ring-2 ring-sky-400 ring-offset-2' : ''
+              className={`card animate-fade-up delay-${Math.min(idx + 1, 4)} overflow-hidden bg-gradient-to-br from-white to-violet-50/30 ${
+                isToday ? 'ring-2 ring-violet-400 ring-offset-2' : ''
               }`}
             >
               <header
                 className={`flex items-center justify-between gap-2 px-4 py-3 ${
                   isToday
-                    ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white'
-                    : 'border-b border-slate-100 bg-slate-50/70 text-slate-800'
+                    ? 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white'
+                    : 'border-b border-slate-100 bg-violet-50/40 text-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -92,16 +71,19 @@ export default function ScheduleView() {
                       key={`${d.key}-${l.lessonNumber}`}
                       className="flex items-start gap-3 px-4 py-3 transition hover:bg-sky-50/50"
                     >
-                      <span
-                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(
-                          l.subject
-                        )} text-xs font-bold text-white`}
-                      >
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(l.subject)} text-xs font-black text-white shadow-md`}>
                         {l.lessonNumber}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-slate-900">{l.subject}</p>
-                        <p className="truncate text-xs text-slate-500">{l.teacher}</p>
+                        <p className="mt-1 flex flex-wrap items-center gap-2 text-[11px] leading-none text-slate-500">
+                          <span className="inline-flex items-center gap-1">
+                            <UserRound className="h-3 w-3 shrink-0 text-slate-400" /> {l.teacher}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3 shrink-0 text-slate-400" /> {l.room}
+                          </span>
+                        </p>
                         {l.notes && (
                           <p className="mt-1.5 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
                             {l.notes}
@@ -112,11 +94,7 @@ export default function ScheduleView() {
                         <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
                           <Clock className="h-3 w-3" /> {l.time.split(' - ')[0]}
                         </p>
-                        {l.room && (
-                          <p className="mt-0.5 flex items-center justify-end gap-1">
-                            <MapPin className="h-3 w-3" /> {l.room}
-                          </p>
-                        )}
+                        <p className="mt-1 hidden text-[10px] text-slate-400 sm:block">{l.time.split(' - ')[1]} дейін</p>
                       </div>
                     </li>
                   ))}
@@ -126,28 +104,6 @@ export default function ScheduleView() {
           );
         })}
       </div>
-
-      {/* Пәндер тізімі */}
-      <section className="card animate-fade-up p-5">
-        <h2 className="mb-3 text-sm font-bold text-slate-900">Апта бойы өтетін пәндер</h2>
-        <div className="flex flex-wrap gap-2">
-          {SUBJECTS.map((s) => {
-            const count = Object.values(WEEK_SCHEDULE)
-              .flat()
-              .filter((l) => l.subject === s).length;
-            return (
-              <span
-                key={s}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
-              >
-                <span className={`h-2 w-2 rounded-full bg-gradient-to-br ${subjectGradient(s)}`} />
-                {s}
-                <span className="text-[10px] font-bold text-slate-400">×{count}</span>
-              </span>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }

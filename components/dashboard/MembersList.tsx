@@ -10,7 +10,8 @@ type Tab = 'student' | 'parent';
 
 export default function MembersList() {
   const { user, openAuth } = useApp();
-  const { data, loading, error } = useCollection<UserProfile>('users');
+  // limit 100 — тіркелгендер тізімі кэшпен бірден
+  const { data, loading, error } = useCollection<UserProfile>('users', 'createdAt', 'desc', 100);
   const [tab, setTab] = useState<Tab>('student');
   const [q, setQ] = useState('');
 
@@ -107,8 +108,12 @@ export default function MembersList() {
             </p>
           )}
 
-          {loading ? (
-            <Loading label="Тізім жүктелуде…" />
+          {loading && data.length === 0 ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-[64px] animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
           ) : filtered.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
               {q ? 'Ештеңе табылмады.' : 'Әзірге ешкім тіркелмеген.'}

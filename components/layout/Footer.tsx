@@ -8,9 +8,9 @@ export default function Footer() {
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:px-6 lg:px-8">
         <p className="flex items-center gap-2">
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 text-[10px] font-black text-white">
-            7A
+            8A
           </span>
-          ClassRoutine — {CLASS_LABEL}
+          SynypKz — {CLASS_LABEL}
         </p>
         <div className="flex items-center gap-4">
           <Link href="/schedule" className="transition hover:text-sky-600">Кесте</Link>

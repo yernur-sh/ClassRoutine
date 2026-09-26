@@ -25,6 +25,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit as fsLimit,
   QueryConstraint,
 } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
@@ -70,8 +71,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!fbUser) {
         setUser(null);
         setLoading(false);
+        try {
+          localStorage.removeItem('synypkz-user');
+        } catch {}
         return;
       }
+      // Алдымен кэштен бірден көрсету (0мс) — бет бірден ашылады
+      try {
+        const cached = localStorage.getItem('synypkz-user');
+        if (cached) {
+          const parsed = JSON.parse(cached) as UserProfile;
+          if (parsed.id === fbUser.uid) {
+            setUser(parsed);
+            setLoading(false);
+          }
+        }
+      } catch {}
       const ref = doc(db, 'users', fbUser.uid);
       let snap = await getDoc(ref);
       if (!snap.exists()) {
@@ -87,8 +102,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
         await setDoc(ref, profile);
         setUser(profile);
+        try {
+          localStorage.setItem('synypkz-user', JSON.stringify(profile));
+        } catch {}
       } else {
-        setUser({ id: fbUser.uid, ...(snap.data() as Omit<UserProfile, 'id'>) });
+        const profile = { id: fbUser.uid, ...(snap.data() as Omit<UserProfile, 'id'>) } as UserProfile;
+        setUser(profile);
+        try {
+          localStorage.setItem('synypkz-user', JSON.stringify(profile));
+        } catch {}
       }
       setLoading(false);
     });
@@ -161,36 +183,77 @@ export function useApp() {
   return ctx;
 }
 
-/** Firestore коллекциясын нақты уақытта тыңдайтын hook. */
+/** Firestore коллекциясын нақты уақытта тыңдайтын hook — жылдам, кэшпен (hydration қатесіз). */
 export function useCollection<T extends { id: string }>(
   path: string,
   orderField?: string,
-  direction: 'asc' | 'desc' = 'desc'
+  direction: 'asc' | 'desc' = 'desc',
+  limitCount?: number
 ) {
+  const cacheKey = `fs-cache:${path}:${orderField ?? ''}:${direction}:${limitCount ?? ''}`;
+
+  // Hydration қатесін болдырмау үшін бастапқы мән әрқашан [] / true — сервер мен клиентте бірдей.
+  // Кэштен оқу тек useEffect ішінде (client mount кейін) жасалады, сонда сервер-дегі "0" мен клиент-тегі "1" сәйкессіздігі болмайды.
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const constraints: QueryConstraint[] = orderField
-      ? [orderBy(orderField, direction)]
-      : [];
+    // Mount кейін кэштен бірден көрсету — бет бірден жылдам ашылады, бірақ hydration-дан кейін
+    let hasCache = false;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as T[];
+        if (Array.isArray(parsed) && parsed.length) {
+          setData(parsed);
+          setLoading(false);
+          hasCache = true;
+        }
+      }
+    } catch {}
+
+    const constraints: QueryConstraint[] = [];
+    if (orderField) constraints.push(orderBy(orderField, direction));
+    if (limitCount) constraints.push(fsLimit(limitCount));
+
     const q = query(collection(db, path), ...constraints);
+
+    // includeMetadataChanges: кэштен келгенде бірден (0-100мс) хабарлайды, сосын серверден жаңартады
     const unsub = onSnapshot(
       q,
+      { includeMetadataChanges: true },
       (snap) => {
-        setData(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[]);
-        setLoading(false);
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[];
+        const isFromCache = snap.metadata.fromCache;
+
+        // Алғашқы ашуда кэш бос болса, бос кэш snapshot-ты елемей, серверді күту — әйтпесе EmptyState бірден көрініп, мәлімет жоқ сияқты болады
+        if (isFromCache && docs.length === 0 && !hasCache) {
+          // loading true күйінде қалдыру — skeleton көрсетіледі, серверден келгенде ауысады
+          return;
+        }
+
+        setData(docs);
         setError(null);
+        setLoading(false);
+        // Келесі ашу үшін localStorage-қа сақтау (жылдам іске қосу)
+        try {
+          if (docs.length) {
+            localStorage.setItem(cacheKey, JSON.stringify(docs.slice(0, 50)));
+          } else if (!isFromCache) {
+            localStorage.removeItem(cacheKey);
+          }
+        } catch {}
       },
       (err) => {
         console.error('Firestore error', path, err);
         setError(err.message);
-        setLoading(false);
+        // Кэш бар болса loading-ді жасырмау — кэш көрсетіліп тұр
+        if (!hasCache) setLoading(false);
       }
     );
     return () => unsub();
-  }, [path, orderField, direction]);
+  }, [path, orderField, direction, limitCount, cacheKey]);
 
   return { data, loading, error };
 }

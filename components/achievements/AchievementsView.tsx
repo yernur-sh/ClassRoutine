@@ -11,19 +11,16 @@ import { Trophy, Plus, Trash2, Loader2, Medal } from 'lucide-react';
 
 export default function AchievementsView() {
   const { user, isTeacher } = useApp();
-  const { data, loading } = useCollection<Achievement>('achievements', 'createdAt');
+  // limit 40 — кэшпен бірден, желі баяу болса да skeleton қысқа
+  const { data, loading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 40);
   const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState<string>('all');
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     studentName: '',
     title: '',
     category: ACHIEVEMENT_CATEGORIES[0].key as string,
     description: '',
-    points: 50,
   });
-
-  const filtered = filter === 'all' ? data : data.filter((a) => a.category === filter);
 
   const leaderboard = useMemo(() => {
     const map = new Map<string, number>();
@@ -37,12 +34,15 @@ export default function AchievementsView() {
     setBusy(true);
     try {
       await addDoc(collection(db, 'achievements'), {
-        ...form,
         studentName: form.studentName.trim(),
+        title: form.title.trim(),
+        category: form.category,
+        description: form.description.trim(),
+        points: 50,
         teacherName: user.name,
         createdAt: Date.now(),
       });
-      setForm({ ...form, studentName: '', title: '', description: '' });
+      setForm({ studentName: '', title: '', category: ACHIEVEMENT_CATEGORIES[0].key as string, description: '' });
       setOpen(false);
     } finally {
       setBusy(false);
@@ -64,40 +64,24 @@ export default function AchievementsView() {
         }
       />
 
+      {/* Вертикально параллель — сол жақта жетістіктер, оң жақта Үздіктер */}
       <div className="grid gap-5 lg:grid-cols-3">
+        {/* Жетістіктер тізімі */}
         <div className="space-y-4 lg:col-span-2">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => setFilter('all')}
-              className={`chip shrink-0 px-3 py-2 ${
-                filter === 'all' ? 'bg-sky-500 text-white' : 'bg-white border border-slate-200 text-slate-600'
-              }`}
-            >
-              Барлығы
-            </button>
-            {ACHIEVEMENT_CATEGORIES.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => setFilter(c.key)}
-                className={`chip shrink-0 px-3 py-2 ${
-                  filter === c.key ? 'bg-sky-500 text-white' : 'bg-white border border-slate-200 text-slate-600'
-                }`}
-              >
-                {c.emoji} {c.label}
-              </button>
-            ))}
-          </div>
-
-          {loading ? (
-            <Loading />
-          ) : filtered.length === 0 ? (
+          {loading && data.length === 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-32 animate-pulse rounded-3xl bg-slate-100" />
+              ))}
+            </div>
+          ) : data.length === 0 ? (
             <EmptyState
               title="Жетістік жоқ"
               description="Мұғалім оқушының жеңісін тіркегенде осында шығады."
             />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {filtered.map((a, i) => {
+              {data.map((a, i) => {
                 const cat = ACHIEVEMENT_CATEGORIES.find((c) => c.key === a.category);
                 return (
                   <article
@@ -112,7 +96,7 @@ export default function AchievementsView() {
                         <h3 className="truncate font-bold text-slate-900">{a.title}</h3>
                         <p className="truncate text-xs text-slate-500">{a.studentName}</p>
                       </div>
-                      <span className="chip shrink-0 bg-amber-50 text-amber-600">+{a.points} XP</span>
+                      <span className="chip shrink-0 bg-amber-50 text-amber-600">+{a.points ?? 50} ұпай</span>
                     </div>
                     {a.description && <p className="mt-2.5 text-sm text-slate-600">{a.description}</p>}
                     <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
@@ -136,7 +120,8 @@ export default function AchievementsView() {
           )}
         </div>
 
-        <aside className="card animate-fade-up delay-2 h-fit p-5">
+        {/* Үздіктер — оң жақта, вертикально параллель */}
+        <aside className="card animate-fade-up delay-1 h-fit p-5 lg:sticky lg:top-20">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
             <Medal className="h-5 w-5 text-amber-500" /> Үздіктер
           </h2>
@@ -149,10 +134,12 @@ export default function AchievementsView() {
                   key={name}
                   className="flex items-center gap-3 rounded-2xl border border-slate-100 p-2.5 transition hover:border-amber-200 hover:bg-amber-50/40"
                 >
-                  <span className="w-5 text-center text-sm font-black text-slate-400">{i + 1}</span>
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-slate-100 text-sm font-black text-slate-500">
+                    {i + 1}
+                  </span>
                   <Avatar name={name} />
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-700">{name}</span>
-                  <span className="chip bg-amber-50 text-amber-600">{points} XP</span>
+                  <span className="chip bg-amber-50 text-amber-600">{points} ұпай</span>
                 </li>
               ))}
             </ol>
@@ -181,32 +168,19 @@ export default function AchievementsView() {
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">Санаты</label>
-              <select
-                className="input"
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
-                {ACHIEVEMENT_CATEGORIES.map((c) => (
-                  <option key={c.key} value={c.key}>
-                    {c.emoji} {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Ұпай (XP)</label>
-              <input
-                type="number"
-                min={5}
-                max={500}
-                className="input"
-                value={form.points}
-                onChange={(e) => setForm({ ...form, points: Number(e.target.value) })}
-              />
-            </div>
+          <div>
+            <label className="label">Санаты</label>
+            <select
+              className="input"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            >
+              {ACHIEVEMENT_CATEGORIES.map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.emoji} {c.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="label">Сипаттама</label>
@@ -216,6 +190,9 @@ export default function AchievementsView() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
+          <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+            Әр жетістікке автоматты түрде <b>50 ұпай</b> қосылады.
+          </p>
           <button type="submit" className="btn-primary w-full" disabled={busy}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" />} Сақтау
           </button>

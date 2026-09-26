@@ -56,7 +56,7 @@ export interface Achievement {
 
 export interface Message {
   id: string;
-  channel: 'general' | 'qa';
+  channel: 'general' | 'qa' | 'parent';
   senderId: string;
   senderName: string;
   senderRole: UserRole;

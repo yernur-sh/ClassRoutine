@@ -17,12 +17,37 @@ export default function FunBreak() {
     setRunning(false);
   }, [activeId, active.seconds]);
 
+  const playAlarm = () => {
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const beep = (freq: number, delay: number, dur: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+        osc.start(t);
+        osc.stop(t + dur);
+      };
+      beep(880, 0, 0.5);
+      beep(880, 0.3, 0.5);
+      beep(1100, 0.6, 0.8);
+    } catch {}
+  };
+
   useEffect(() => {
     if (!running) return;
     timer.current = setInterval(() => {
       setSeconds((s) => {
         if (s <= 1) {
           setRunning(false);
+          playAlarm();
           return 0;
         }
         return s - 1;
@@ -41,7 +66,7 @@ export default function FunBreak() {
     <div className="space-y-6">
       <PageHeader
         title="Көңілді үзіліс"
-        subtitle="Сабақ арасында 1–2 минут сергіп алыңыз"
+        subtitle="Сабақ арасында 10 минут сергіп алыңыз"
         icon={<Smile className="h-6 w-6" />}
       />
 
@@ -61,7 +86,7 @@ export default function FunBreak() {
             </span>
             <span className="min-w-0">
               <span className="block truncate font-bold text-slate-800">{ex.title}</span>
-              <span className="block text-xs text-slate-500">{ex.seconds} секунд</span>
+              <span className="block text-xs text-slate-500">10 минут</span>
             </span>
           </button>
         ))}
@@ -112,6 +137,7 @@ export default function FunBreak() {
                 <RotateCcw className="h-4 w-4" /> Қайта
               </button>
             </div>
+
           </div>
 
           <div>

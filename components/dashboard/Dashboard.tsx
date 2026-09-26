@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
-import { Announcement, Homework, Achievement } from '@/lib/types';
+import { Announcement, Achievement } from '@/lib/types';
 import { CLASS_LABEL, subjectGradient } from '@/lib/config';
 import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
@@ -11,21 +11,21 @@ import MembersList from '@/components/dashboard/MembersList';
 import {
   CalendarDays,
   Megaphone,
-  BookOpen,
   Trophy,
   ArrowRight,
   Clock,
-  MapPin,
   AlertCircle,
   HeartHandshake,
   Sparkles,
+  UserRound,
+  MapPin,
 } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, openAuth, loading: authLoading } = useApp();
-  const { data: announcements } = useCollection<Announcement>('announcements', 'createdAt');
-  const { data: homework } = useCollection<Homework>('homework', 'createdAt');
-  const { data: achievements } = useCollection<Achievement>('achievements', 'createdAt');
+  // limit қосылды —Firestore-дан тек соңғы 6 жазба алынады, кэш + persistentLocalCache арқасында бірден (0-80мс) көрінеді
+  const { data: announcements, loading: annLoading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 6);
+  const { data: achievements, loading: achLoading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 6);
 
   const day = todayKey();
   const todayLessons = lessonsFor(day);
@@ -34,7 +34,6 @@ export default function Dashboard() {
   const stats = [
     { label: 'Апталық сабақ', value: TOTAL_LESSONS, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
     { label: 'Хабарлама', value: announcements.length, icon: Megaphone, color: 'from-amber-400 to-orange-500', href: '/communication' },
-    { label: 'Үй тапсырмасы', value: homework.length, icon: BookOpen, color: 'from-emerald-400 to-teal-500', href: '/communication' },
     { label: 'Жетістік', value: achievements.length, icon: Trophy, color: 'from-violet-400 to-purple-500', href: '/achievements' },
   ];
 
@@ -50,7 +49,7 @@ export default function Dashboard() {
             {user ? `Сәлем, ${user.name.split(' ')[0]}!` : 'Сынып порталына қош келдіңіз'}
           </h1>
           <p className="mt-2 max-w-lg text-sm text-white/85 sm:text-base">
-            Сабақ кестесі, тәрбие сағаты, үй тапсырмасы, жетістіктер және ЖИ-көмекші — бәрі бір жерде.
+            Сабақ кестесі, тәрбие сағаты, жетістіктер және ЖИ-көмекші — бәрі бір жерде.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/schedule" className="btn bg-white text-sky-600 hover:bg-sky-50">
@@ -59,17 +58,12 @@ export default function Dashboard() {
             <Link href="/ai-assistant" className="btn bg-white/15 text-white hover:bg-white/25">
               <Sparkles className="h-4 w-4" /> ЖИ-көмекші
             </Link>
-            {!user && !authLoading && (
-              <button onClick={() => openAuth('register')} className="btn bg-white/15 text-white hover:bg-white/25">
-                Тіркелу
-              </button>
-            )}
           </div>
         </div>
       </section>
 
       {/* Статистика */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {stats.map((s, i) => (
           <Link
             key={s.label}
@@ -111,22 +105,25 @@ export default function Dashboard() {
                   key={l.lessonNumber}
                   className={`animate-fade-up delay-${Math.min(i + 1, 4)} flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm`}
                 >
-                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(l.subject)} text-sm font-bold text-white`}>
+                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${subjectGradient(l.subject)} text-sm font-black text-white shadow-md`}>
                     {l.lessonNumber}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-slate-800">{l.subject}</p>
-                    <p className="truncate text-xs text-slate-500">{l.teacher}</p>
+                    <p className="flex flex-wrap items-center gap-2 truncate text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <UserRound className="h-3 w-3 shrink-0" /> {l.teacher}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0" /> {l.room}
+                      </span>
+                    </p>
                   </div>
                   <div className="shrink-0 text-right text-xs text-slate-500">
                     <p className="flex items-center justify-end gap-1 font-semibold text-slate-700">
-                      <Clock className="h-3.5 w-3.5" /> {l.time}
+                      <Clock className="h-3.5 w-3.5" /> {l.time.split(' - ')[0]}
                     </p>
-                    {l.room && (
-                      <p className="flex items-center justify-end gap-1">
-                        <MapPin className="h-3 w-3" /> {l.room}
-                      </p>
-                    )}
+                    <p className="text-[10px] text-slate-400">{l.time.split(' - ')[1]} дейін</p>
                   </div>
                 </li>
               ))}
@@ -144,7 +141,13 @@ export default function Dashboard() {
               Барлығы
             </Link>
           </div>
-          {announcements.length === 0 ? (
+          {annLoading && announcements.length === 0 ? (
+            <div className="space-y-2.5">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-[72px] animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+          ) : announcements.length === 0 ? (
             <EmptyState title="Хабарлама жоқ" description="Сынып жетекшісі жариялағанда осында шығады." />
           ) : (
             <ul className="space-y-2.5">
