@@ -71,7 +71,29 @@ export default function CommunicationHub() {
 /* ---------------- Хабарламалар ---------------- */
 
 function Announcements({ canPost }: { canPost: boolean }) {
-  const { user } = useApp();
+  const { user, isTeacher, isHomeroom } = useApp();
+  // Сынып жетекшісі мен мұғалімдер кез келген хабарламаны өшіре алады,
+  // қалған қолданушылар — тек өздері жариялағанын.
+  const canManage = isHomeroom || isTeacher;
+  const [delId, setDelId] = useState<string | null>(null);
+  const [delErr, setDelErr] = useState('');
+
+  const remove = async (id: string) => {
+    if (!confirm('Хабарламаны өшіресіз бе?')) return;
+    setDelErr('');
+    setDelId(id);
+    try {
+      await deleteDoc(doc(db, 'announcements', id));
+    } catch (e: any) {
+      setDelErr(
+        e?.code === 'permission-denied'
+          ? 'Өшіруге рұқсат жоқ. Firebase Console → Firestore → Rules бөлімінде жобадағы firestore.rules ережелерін жаңартыңыз.'
+          : 'Өшіру кезінде қате шықты. Интернетті тексеріп, қайта көріңіз.'
+      );
+    } finally {
+      setDelId(null);
+    }
+  };
   // limit 30 — соңғы 30 хабарлама жеткілікті, Firestore-дан тез (кэштен 0-80мс)
   const { data, loading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 30);
   const [open, setOpen] = useState(false);
@@ -110,6 +132,12 @@ function Announcements({ canPost }: { canPost: boolean }) {
         </button>
       )}
 
+      {delErr && (
+        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-medium leading-relaxed text-rose-700">
+          {delErr}
+        </p>
+      )}
+
       {loading && data.length === 0 ? (
         <div className="grid gap-3 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -136,13 +164,19 @@ function Announcements({ canPost }: { canPost: boolean }) {
                     {a.important && <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />}
                     {a.title}
                   </h3>
-                  {user?.id === a.authorId && (
+                  {(canManage || user?.id === a.authorId) && (
                     <button
-                      onClick={() => deleteDoc(doc(db, 'announcements', a.id))}
-                      className="btn-danger h-8 w-8 shrink-0 !p-0"
+                      onClick={() => remove(a.id)}
+                      disabled={delId === a.id}
+                      className="btn-danger h-8 w-8 shrink-0 !p-0 disabled:opacity-50"
                       aria-label="Жою"
+                      title="Хабарламаны өшіру"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      {delId === a.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
                     </button>
                   )}
                 </div>
