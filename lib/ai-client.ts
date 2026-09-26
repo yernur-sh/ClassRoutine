@@ -20,12 +20,21 @@ export interface AskOptions {
   onDelta: (chunk: string) => void;
 }
 
-export type OfflineReason = 'no_provider' | 'upstream_error' | 'network' | null;
+export type OfflineReason =
+  | 'no_provider'
+  | 'bad_key'
+  | 'rate_limit'
+  | 'model_not_found'
+  | 'upstream_error'
+  | 'network'
+  | null;
 
 export type AskResult = {
   mode: 'ai' | 'offline' | 'blocked';
   text: string;
   reason?: OfflineReason;
+  /** Провайдер қайтарған түпнұсқа қате мәтіні (диагностика үшін). */
+  detail?: string;
 };
 
 export async function askAssistant(opts: AskOptions): Promise<AskResult> {
@@ -53,15 +62,18 @@ export async function askAssistant(opts: AskOptions): Promise<AskResult> {
 
     if (!res.ok || !res.body) {
       let reason: OfflineReason = 'upstream_error';
+      let detail = '';
       try {
         const j = await res.json();
-        if (j?.error === 'no_provider') reason = 'no_provider';
+        const known = ['no_provider', 'bad_key', 'rate_limit', 'model_not_found', 'upstream_error'];
+        if (known.includes(j?.error)) reason = j.error;
+        detail = j?.detail || '';
       } catch {
         /* ignore */
       }
       const text = offlineAnswer(question);
       opts.onDelta(text);
-      return { mode: 'offline', text, reason };
+      return { mode: 'offline', text, reason, detail };
     }
 
     const reader = res.body.getReader();
