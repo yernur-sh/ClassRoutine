@@ -2,11 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/lib/store';
-import { QUICK_PROMPTS, type ChatMessage } from '@/lib/assistant';
+import { type ChatMessage } from '@/lib/assistant';
 import { askAssistant } from '@/lib/ai-client';
 import { latexToReadable } from '@/lib/math-text';
 import { PageHeader, Avatar } from '@/components/ui';
-import { Sparkles, Send, Bot, RotateCcw, Lightbulb, ShieldCheck, Square, WifiOff } from 'lucide-react';
+import { Sparkles, Send, Bot, RotateCcw, Square, WifiOff } from 'lucide-react';
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -209,9 +209,9 @@ export default function AiAssistant() {
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="mx-auto w-full max-w-4xl">
         {/* Чат */}
-        <section className="card animate-fade-up flex h-[70vh] min-h-[480px] flex-col overflow-hidden lg:col-span-2">
+        <section className="card animate-fade-up flex h-[72vh] min-h-[520px] flex-col overflow-hidden">
           <header className="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-3 text-white">
             <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20">
               <Bot className="h-5 w-5" />
@@ -297,39 +297,6 @@ export default function AiAssistant() {
           </form>
         </section>
 
-        {/* Оң жақ бағана */}
-        <div className="space-y-5">
-          <section className="card animate-fade-up delay-1 p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
-              <Lightbulb className="h-4 w-4 text-amber-500" /> Дайын сұрақтар
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_PROMPTS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => send(p)}
-                  disabled={typing}
-                  className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-semibold text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 disabled:opacity-50"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="card animate-fade-up delay-2 p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" /> Қауіпсіз қолдану
-            </h2>
-            <ul className="space-y-2 text-xs leading-relaxed text-slate-500">
-              <li>• Көмекші тек <b>мектеп және оқу-білім</b> тақырыбында жауап береді.</li>
-              <li>• Тақырыптан тыс сұрақтарға (саясат, ойын, ересектер мазмұны т.б.) жауап бермейді.</li>
-              <li>• Кесте, мұғалім, тәрбие сағаты туралы деректерді сынып базасынан алады.</li>
-              <li>• Үй тапсырмасын орнына орындамайды — шешу жолын қадаммен түсіндіреді.</li>
-              <li>• Жеке деректерді (құпиясөз, телефон нөмірі) жазбаңыз.</li>
-            </ul>
-          </section>
-        </div>
       </div>
     </div>
   );
