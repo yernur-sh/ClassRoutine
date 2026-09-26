@@ -12,7 +12,7 @@ import {
   nextSchoolDayKey,
   dayLabel,
 } from './schedule-data';
-import { CLASS_HOURS, CLASS_HOUR_SLOT, CLASS_RULES } from './class-hour-data';
+import { CLASS_HOUR_PLAN, MONTHS, currentWeek, directionOf, monthLabel } from './class-hour-data';
 
 /** Сынып деректерін қысқа мәтінге жинау (модель контексті үшін). */
 export function buildClassContext(now = new Date()): string {
@@ -28,9 +28,21 @@ export function buildClassContext(now = new Date()): string {
   const tomorrow = tomorrowKey(now);
   const next = nextSchoolDayKey(now);
 
-  const classHours = CLASS_HOURS.map(
-    (c) => `- ${c.date} «${c.title}» (${c.done ? 'өтті' : 'жоспарда'}) — мақсаты: ${c.goal}`
-  ).join('\n');
+  const cur = currentWeek(now);
+  const planText = MONTHS.map((m) => {
+    const weeks = CLASS_HOUR_PLAN.filter((w) => w.month === m.key);
+    if (!weeks.length) return '';
+    const rows = weeks
+      .map(
+        (w) =>
+          `  ${w.week}-апта: ` +
+          w.topics.map((t) => `[${directionOf(t.direction).short}] ${t.title}`).join(' | ')
+      )
+      .join('\n');
+    return `${m.label}:\n${rows}`;
+  })
+    .filter(Boolean)
+    .join('\n');
 
   return [
     `СЫНЫП: ${CLASS_LABEL}. Аптасына ${TOTAL_LESSONS} сабақ, ${SUBJECTS.length} пән.`,
@@ -45,11 +57,12 @@ export function buildClassContext(now = new Date()): string {
     'АПТАЛЫҚ КЕСТЕ:',
     scheduleText,
     '',
-    `ТӘРБИЕ САҒАТЫ: ${CLASS_HOUR_SLOT.day}, ${CLASS_HOUR_SLOT.time}, ${CLASS_HOUR_SLOT.room}.`,
-    classHours,
-    '',
-    'СЫНЫП ЕРЕЖЕЛЕРІ:',
-    CLASS_RULES.map((r) => `- ${r}`).join('\n'),
+    'ТӘРБИЕ САҒАТЫ (2026-2027 оқу жылының бекітілген тақырыптары, апта сайын):',
+    planText,
+    cur
+      ? `ОСЫ АПТАНЫҢ ТАҚЫРЫБЫ (${monthLabel(cur.month)} ${cur.week}-апта): ` +
+        cur.topics.map((t) => `«${t.title}»`).join('; ')
+      : 'Қазір жоспарда тәрбие сағаты тақырыбы жоқ (демалыс кезеңі).',
   ].join('\n');
 }
 
