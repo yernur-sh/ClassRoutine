@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
-import { Announcement, Achievement } from '@/lib/types';
+import { Announcement } from '@/lib/types';
 import { CLASS_LABEL, subjectGradient } from '@/lib/config';
 import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor, nextSchoolDayKey } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
 import MembersList from '@/components/dashboard/MembersList';
+import { ACHIEVEMENTS } from '@/lib/achievements-data';
 import { canAccess } from '@/lib/access';
 import {
   CalendarDays,
@@ -26,7 +27,7 @@ export default function Dashboard() {
   const { user, openAuth, loading: authLoading } = useApp();
   // limit қосылды —Firestore-дан тек соңғы 6 жазба алынады, кэш + persistentLocalCache арқасында бірден (0-80мс) көрінеді
   const { data: announcements, loading: annLoading } = useCollection<Announcement>('announcements', 'createdAt', 'desc', 6);
-  const { data: achievements, loading: achLoading } = useCollection<Achievement>('achievements', 'createdAt', 'desc', 6);
+  const achievements = ACHIEVEMENTS; // жетістіктер тізімі кодта (lib/achievements-data.ts)
 
   const canChat = canAccess(user?.role, '/communication');
 
