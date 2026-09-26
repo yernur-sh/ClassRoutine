@@ -98,7 +98,7 @@ export default function AuthModal() {
                   className="input"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  placeholder="Арман Сейітов"
+                  placeholder="Аты-жөні"
                   required
                 />
               </div>
