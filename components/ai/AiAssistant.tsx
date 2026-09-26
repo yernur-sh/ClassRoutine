@@ -47,6 +47,7 @@ export default function AiAssistant() {
   const [typing, setTyping] = useState(false);
   const [offline, setOffline] = useState(false);
   const [offlineReason, setOfflineReason] = useState<string | null>(null);
+  const [offlineDetail, setOfflineDetail] = useState<string>('');
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -97,6 +98,7 @@ export default function AiAssistant() {
       });
       setOffline(res.mode === 'offline');
       setOfflineReason(res.mode === 'offline' ? res.reason ?? null : null);
+      setOfflineDetail(res.mode === 'offline' ? res.detail ?? '' : '');
     } catch {
       /* тоқтатылды */
     } finally {
@@ -136,19 +138,44 @@ export default function AiAssistant() {
           <span>
             {offlineReason === 'no_provider' ? (
               <>
-                <b>ЖИ кілті бапталмаған.</b> Көмекші қазір сынып деректері негізіндегі офлайн режимде
-                жауап беруде. Толық жасанды интеллектіні қосу үшін жоба түбінде{' '}
-                <code className="rounded bg-amber-100 px-1">.env.local</code> файлын жасап, кілт
-                қосыңыз (мыс. <code className="rounded bg-amber-100 px-1">GROQ_API_KEY=...</code>) және
-                серверді қайта іске қосыңыз. Нұсқаулық — README «ЖИ-көмекшіні қосу» бөлімінде.
+                <b>ЖИ кілті бапталмаған.</b> Жоба түбінде{' '}
+                <code className="rounded bg-amber-100 px-1">.env.local</code> файлын жасап, кілт қосыңыз
+                (мыс. <code className="rounded bg-amber-100 px-1">GROQ_API_KEY=...</code>), сосын серверді
+                қайта іске қосыңыз.
+              </>
+            ) : offlineReason === 'bad_key' ? (
+              <>
+                <b>Кілт жарамсыз.</b> console.groq.com сайтынан жаңа кілт жасап,{' '}
+                <code className="rounded bg-amber-100 px-1">.env.local</code> ішіне қойыңыз да, серверді
+                қайта қосыңыз.
+              </>
+            ) : offlineReason === 'rate_limit' ? (
+              <>
+                <b>Лимит бітті.</b> Тегін жоспардың сағаттық/тәуліктік шегіне жеттіңіз — біраз күтіп,
+                қайта сұраңыз.
+              </>
+            ) : offlineReason === 'model_not_found' ? (
+              <>
+                <b>Модель табылмады.</b>{' '}
+                <code className="rounded bg-amber-100 px-1">.env.local</code> ішіндегі{' '}
+                <code className="rounded bg-amber-100 px-1">AI_MODEL</code> жолын өшіріңіз — жүйе жарамды
+                модельді өзі таңдайды. Тексеру:{' '}
+                <a className="underline" href="/api/ai/status?live=1" target="_blank" rel="noreferrer">
+                  /api/ai/status?live=1
+                </a>
               </>
             ) : offlineReason === 'upstream_error' ? (
               <>
-                <b>ЖИ қызметі жауап бермеді</b> (кілт қате немесе лимит бітуі мүмкін) — көмекші офлайн
-                режимде жауап беруде.
+                <b>ЖИ қызметі жауап бермеді.</b> Тексеру:{' '}
+                <a className="underline" href="/api/ai/status?live=1" target="_blank" rel="noreferrer">
+                  /api/ai/status?live=1
+                </a>
               </>
             ) : (
               <>Интернет байланысы үзілді — көмекші офлайн режимде жауап беруде.</>
+            )}
+            {offlineDetail && (
+              <span className="mt-1 block font-normal text-amber-700/80">{offlineDetail}</span>
             )}
           </span>
         </div>
