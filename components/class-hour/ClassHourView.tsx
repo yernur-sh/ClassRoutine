@@ -2,59 +2,48 @@
 
 import React, { useState } from 'react';
 import {
-  CLASS_HOURS,
-  CLASS_HOUR_DIRECTIONS,
-  CLASS_HOUR_SLOT,
-  CLASS_RULES,
-  DUTY_ROSTER,
+  CLASS_HOUR_PLAN,
+  DIRECTIONS,
+  MONTHS,
+  TOTAL_TOPICS,
+  currentWeek,
+  isPastWeek,
+  directionOf,
+  monthLabel,
+  type ClassHourWeek,
   type ClassHourTopic,
 } from '@/lib/class-hour-data';
 import { PageHeader } from '@/components/ui';
-import {
-  HeartHandshake,
-  Clock,
-  MapPin,
-  User,
-  Target,
-  ListChecks,
-  MessageCircleQuestion,
-  CheckCircle2,
-  CalendarDays,
-  Sparkles,
-  ChevronDown,
-  Brush,
-} from 'lucide-react';
+import { HeartHandshake, ChevronDown, Target, HelpCircle, CheckCircle2, Sparkles } from 'lucide-react';
 
-function direction(key: string) {
-  return CLASS_HOUR_DIRECTIONS.find((d) => d.key === key) ?? CLASS_HOUR_DIRECTIONS[0];
-}
+function TopicCard({
+  topic,
+  defaultOpen = false,
+}: {
+  topic: ClassHourTopic;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const d = directionOf(topic.direction);
 
-function TopicCard({ topic, index }: { topic: ClassHourTopic; index: number }) {
-  const [open, setOpen] = useState(false);
-  const dir = direction(topic.direction);
   return (
-    <article className={`card animate-fade-up delay-${Math.min(index + 1, 4)} overflow-hidden`}>
+    <div className={`overflow-hidden rounded-2xl border ${d.soft} transition`}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-start gap-3 p-4 text-left transition hover:bg-slate-50"
+        className="flex w-full items-start gap-3 px-4 py-3 text-left"
       >
         <span
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dir.gradient} text-base`}
+          className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${d.gradient} text-base shadow-sm`}
         >
-          {topic.emoji}
+          {d.emoji}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-1.5">
-            <span className="chip bg-slate-100 text-slate-600">{topic.week}</span>
-            <span className="chip bg-sky-50 text-sky-600">{topic.date}</span>
-            {topic.done && (
-              <span className="chip bg-emerald-50 text-emerald-600">
-                <CheckCircle2 className="h-3 w-3" /> Өтті
-              </span>
-            )}
+          <span className={`block text-[11px] font-bold uppercase tracking-wide ${d.text}`}>
+            {d.label}
           </span>
-          <span className="mt-1.5 block font-bold text-slate-900">{topic.title}</span>
-          <span className="mt-0.5 block text-xs text-slate-500">{dir.label}</span>
+          <span className="mt-0.5 block text-sm font-semibold leading-snug text-slate-800">
+            {topic.title}
+          </span>
         </span>
         <ChevronDown
           className={`mt-1 h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -62,37 +51,32 @@ function TopicCard({ topic, index }: { topic: ClassHourTopic; index: number }) {
       </button>
 
       {open && (
-        <div className="animate-fade-in space-y-4 border-t border-slate-100 px-4 py-4">
-          <div className="rounded-2xl bg-sky-50/70 p-3">
-            <p className="mb-1 flex items-center gap-1.5 text-xs font-bold text-sky-700">
-              <Target className="h-3.5 w-3.5" /> Мақсаты
-            </p>
-            <p className="text-sm text-slate-600">{topic.goal}</p>
-          </div>
+        <div className="animate-fade-in space-y-4 border-t border-white/70 bg-white/70 px-4 py-4">
+          <p className="text-sm leading-relaxed text-slate-600">{topic.about}</p>
+
           <div>
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-slate-700">
-              <ListChecks className="h-3.5 w-3.5" /> Жоспар
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
+              <Target className="h-3.5 w-3.5" /> Негізгі ойлар
             </p>
-            <ol className="space-y-1.5">
-              {topic.plan.map((step, i) => (
-                <li key={i} className="flex gap-2 text-sm text-slate-600">
-                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-lg bg-slate-100 text-[10px] font-bold text-slate-500">
-                    {i + 1}
-                  </span>
-                  {step}
+            <ul className="space-y-1.5">
+              {topic.points.map((p, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                  <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br ${d.gradient}`} />
+                  <span className="leading-snug">{p}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
           </div>
+
           <div>
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-slate-700">
-              <MessageCircleQuestion className="h-3.5 w-3.5" /> Талқылау сұрақтары
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
+              <HelpCircle className="h-3.5 w-3.5" /> Талқылау сұрақтары
             </p>
-            <ul className="flex flex-wrap gap-2">
-              {topic.questions.map((q) => (
+            <ul className="space-y-1.5">
+              {topic.questions.map((q, i) => (
                 <li
-                  key={q}
-                  className="rounded-2xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600"
+                  key={i}
+                  className="rounded-xl bg-slate-50 px-3 py-2 text-sm italic leading-snug text-slate-600"
                 >
                   {q}
                 </li>
@@ -101,134 +85,161 @@ function TopicCard({ topic, index }: { topic: ClassHourTopic; index: number }) {
           </div>
         </div>
       )}
-    </article>
+    </div>
+  );
+}
+
+function WeekBlock({ week, highlight }: { week: ClassHourWeek; highlight: boolean }) {
+  const past = isPastWeek(week);
+
+  return (
+    <section
+      className={`card overflow-hidden ${highlight ? 'ring-2 ring-sky-400 ring-offset-2' : ''}`}
+    >
+      <header
+        className={`flex items-center justify-between gap-2 px-4 py-3 ${
+          highlight
+            ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white'
+            : 'border-b border-slate-100 bg-slate-50/70 text-slate-800'
+        }`}
+      >
+        <h3 className="flex items-center gap-2 font-bold">
+          <span
+            className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-black ${
+              highlight ? 'bg-white/20 text-white' : 'bg-white text-slate-500 shadow-sm'
+            }`}
+          >
+            {week.week}
+          </span>
+          {week.week}-апта
+        </h3>
+        <span
+          className={`chip ${
+            highlight
+              ? 'bg-white/20 text-white'
+              : past
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-slate-200/70 text-slate-600'
+          }`}
+        >
+          {highlight ? (
+            <>
+              <Sparkles className="h-3 w-3" /> Осы апта
+            </>
+          ) : past ? (
+            <>
+              <CheckCircle2 className="h-3 w-3" /> Өтті
+            </>
+          ) : (
+            `${week.topics.length} тақырып`
+          )}
+        </span>
+      </header>
+
+      <div className="space-y-2.5 p-3">
+        {week.topics.map((t, i) => (
+          <TopicCard key={i} topic={t} defaultOpen={highlight && week.topics.length === 1} />
+        ))}
+      </div>
+    </section>
   );
 }
 
 export default function ClassHourView() {
-  const upcoming = CLASS_HOURS.filter((t) => !t.done);
-  const past = CLASS_HOURS.filter((t) => t.done);
-  const next = upcoming[0];
-  const nextDir = next ? direction(next.direction) : null;
+  const cur = currentWeek();
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Тәрбие сағаты"
-        subtitle="Сынып жетекшісінің апталық тәрбие сағаты — тақырып, жоспар және құндылықтар"
+        subtitle="2026-2027 оқу жылының апталық тақырыптары"
         icon={<HeartHandshake className="h-6 w-6" />}
       />
 
-      {/* Кезекті тәрбие сағаты */}
-      {next && nextDir && (
-        <section
-          className={`animate-fade-up relative overflow-hidden rounded-3xl bg-gradient-to-r ${nextDir.gradient} px-6 py-7 text-white shadow-lg sm:px-8`}
-        >
-          <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-white/15 animate-floaty" />
+      {/* Осы аптаның тақырыптары */}
+      {cur && (
+        <section className="animate-fade-up relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 px-5 py-6 text-white shadow-lg shadow-sky-200 sm:px-8">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
           <div className="relative">
             <span className="chip bg-white/20 text-white">
-              <Sparkles className="h-3 w-3" /> Кезекті тақырып · {next.week}
+              <Sparkles className="h-3 w-3" /> Осы апта
             </span>
-            <h2 className="mt-3 text-2xl font-extrabold sm:text-3xl">
-              {next.emoji} {next.title}
+            <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">
+              {monthLabel(cur.month)} · {cur.week}-апта
             </h2>
-            <p className="mt-2 max-w-2xl text-sm text-white/85">{next.goal}</p>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs">
-              <span className="chip bg-white/20 text-white">
-                <CalendarDays className="h-3 w-3" /> {next.date} · {CLASS_HOUR_SLOT.day}
-              </span>
-              <span className="chip bg-white/20 text-white">
-                <Clock className="h-3 w-3" /> {CLASS_HOUR_SLOT.time}
-              </span>
-              <span className="chip bg-white/20 text-white">
-                <MapPin className="h-3 w-3" /> {CLASS_HOUR_SLOT.room}
-              </span>
-              <span className="chip bg-white/20 text-white">
-                <User className="h-3 w-3" /> {CLASS_HOUR_SLOT.teacher}
-              </span>
-            </div>
+            <ul className="mt-3 space-y-2">
+              {cur.topics.map((t, i) => {
+                const d = directionOf(t.direction);
+                return (
+                  <li key={i} className="flex items-start gap-2 text-sm text-white/95">
+                    <span className="mt-0.5 shrink-0">{d.emoji}</span>
+                    <span className="leading-snug">
+                      <b className="font-semibold">{d.short}:</b> {t.title}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </section>
       )}
 
       {/* Бағыттар */}
-      <section className="animate-fade-up flex flex-wrap gap-2">
-        {CLASS_HOUR_DIRECTIONS.map((d) => (
-          <span
-            key={d.key}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
-          >
-            <span className={`grid h-5 w-5 place-items-center rounded-full bg-gradient-to-br ${d.gradient} text-[10px]`}>
-              {d.emoji}
-            </span>
-            {d.label}
-          </span>
-        ))}
+      <section className="animate-fade-up delay-1">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">
+          Тәрбие жұмысының бағыттары
+        </h2>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {DIRECTIONS.map((d) => {
+            const count = CLASS_HOUR_PLAN.reduce(
+              (n, w) => n + w.topics.filter((t) => t.direction === d.key).length,
+              0
+            );
+            return (
+              <div
+                key={d.key}
+                className={`flex items-center gap-3 rounded-2xl border ${d.soft} px-3 py-2.5`}
+              >
+                <span
+                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${d.gradient} text-base shadow-sm`}
+                >
+                  {d.emoji}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={`block truncate text-sm font-bold ${d.text}`}>{d.short}</span>
+                  <span className="block truncate text-[11px] text-slate-500">{d.label}</span>
+                </span>
+                <span className="shrink-0 text-sm font-extrabold text-slate-400">{count}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="mt-2 text-xs text-slate-400">
+          Барлығы {CLASS_HOUR_PLAN.length} апта · {TOTAL_TOPICS} тақырып
+        </p>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        {/* Тақырыптар */}
-        <div className="space-y-5 lg:col-span-2">
-          <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <CalendarDays className="h-5 w-5 text-sky-500" /> Жоспарланған тәрбие сағаттары
-            </h2>
-            {upcoming.map((t, i) => (
-              <TopicCard key={t.id} topic={t} index={i} />
-            ))}
-          </section>
-
-          {past.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" /> Өткен тақырыптар
-              </h2>
-              {past.map((t, i) => (
-                <TopicCard key={t.id} topic={t} index={i} />
+      {/* Айлар бойынша толық жоспар */}
+      {MONTHS.map((m, mi) => {
+        const weeks = CLASS_HOUR_PLAN.filter((w) => w.month === m.key);
+        if (!weeks.length) return null;
+        return (
+          <section key={m.key} className={`animate-fade-up delay-${Math.min(mi + 1, 4)} space-y-3`}>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-extrabold text-slate-900">{m.label}</h2>
+              <span className="h-px flex-1 bg-slate-200" />
+              <span className="chip bg-slate-100 text-slate-500">
+                {weeks.reduce((n, w) => n + w.topics.length, 0)} тақырып
+              </span>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {weeks.map((w) => (
+                <WeekBlock key={w.id} week={w} highlight={cur?.id === w.id} />
               ))}
-            </section>
-          )}
-        </div>
-
-        {/* Оң жақ бағана */}
-        <div className="space-y-5">
-          <section className="card animate-fade-up p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
-              <ListChecks className="h-4 w-4 text-indigo-500" /> Сынып келісімі
-            </h2>
-            <ul className="space-y-2">
-              {CLASS_RULES.map((r, i) => (
-                <li key={i} className="flex gap-2 text-sm text-slate-600">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                  {r}
-                </li>
-              ))}
-            </ul>
+            </div>
           </section>
-
-          <section className="card animate-fade-up delay-1 p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
-              <Brush className="h-4 w-4 text-amber-500" /> Кезекшілік кестесі
-            </h2>
-            <ul className="space-y-2">
-              {DUTY_ROSTER.map((d) => (
-                <li
-                  key={d.week}
-                  className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2 text-sm"
-                >
-                  <span className="font-semibold text-slate-700">{d.week}</span>
-                  <span className="text-xs text-slate-500">{d.students}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <p className="rounded-2xl bg-slate-100/70 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
-            Тәрбие сағатының тақырыптары мен жоспары <b>lib/class-hour-data.ts</b> файлында
-            сақталады және тек әзірлеуші арқылы жаңартылады.
-          </p>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

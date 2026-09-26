@@ -13,7 +13,7 @@ import {
   nextSchoolDayKey,
   dayLabel,
 } from './schedule-data';
-import { CLASS_HOURS, CLASS_HOUR_SLOT, CLASS_RULES } from './class-hour-data';
+import { currentWeek, nextWeek, directionOf, monthLabel } from './class-hour-data';
 
 export interface ChatMessage {
   id: string;
@@ -140,13 +140,24 @@ export function answer(question: string): string {
 
   // Тәрбие сағаты
   if (has(t, 'тәрбие', 'тарбие', 'классный час', 'класс сағат')) {
-    const next = CLASS_HOURS.find((c) => !c.done);
-    if (!next) return 'Жақын арада жоспарланған тәрбие сағаты жоқ.';
-    return `Кезекті тәрбие сағаты — **«${next.title}»** (${next.date}, ${CLASS_HOUR_SLOT.day}, ${CLASS_HOUR_SLOT.time}, ${CLASS_HOUR_SLOT.room}).\nМақсаты: ${next.goal}\nЖоспары:\n${next.plan.map((p, i) => `${i + 1}. ${p}`).join('\n')}\n\nТолығырақ — «Тәрбие сағаты» бетінде.`;
-  }
+    const cur = currentWeek();
+    const nxt = nextWeek();
+    const fmt = (w: NonNullable<ReturnType<typeof currentWeek>>) =>
+      w.topics
+        .map((x) => `• **${directionOf(x.direction).short}:** ${x.title}\n  ${x.about}`)
+        .join('\n');
 
-  if (has(t, 'ереже', 'тәртіп', 'тартип', 'келісім')) {
-    return `Сынып келісімі:\n${CLASS_RULES.map((r) => `• ${r}`).join('\n')}`;
+    if (cur) {
+      return (
+        `Осы аптаның тәрбие сағаты (${monthLabel(cur.month)}, ${cur.week}-апта):\n${fmt(cur)}` +
+        (nxt ? `\n\nКелесі апта (${monthLabel(nxt.month)}, ${nxt.week}-апта):\n${nxt.topics.map((x) => `• ${x.title}`).join('\n')}` : '') +
+        '\n\nБарлық тақырыптар — «Тәрбие сағаты» бетінде.'
+      );
+    }
+    if (nxt) {
+      return `Кезекті тәрбие сағаты (${monthLabel(nxt.month)}, ${nxt.week}-апта):\n${fmt(nxt)}\n\nТолық жоспар — «Тәрбие сағаты» бетінде.`;
+    }
+    return 'Тәрбие сағатының толық жоспарын «Тәрбие сағаты» бетінен көре аласыз.';
   }
 
   // Күнге байланысты сұрақтар
@@ -189,7 +200,7 @@ export function answer(question: string): string {
       );
       return `${teacherHit} — ${subjects.join(', ')} пәнінен сабақ береді.`;
     }
-    return `Сынып жетекшісі — ${CLASS_HOUR_SLOT.teacher}. Пән мұғалімдерін «Кесте» бетінен көре аласыз.`;
+    return 'Пән мұғалімдерін «Кесте» бетінен көре аласыз.';
   }
 
   // Кабинет / уақыт
