@@ -225,6 +225,14 @@ export function useCollection<T extends { id: string }>(
       { includeMetadataChanges: true },
       (snap) => {
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as T[];
+        const isFromCache = snap.metadata.fromCache;
+
+        // Алғашқы ашуда кэш бос болса, бос кэш snapshot-ты елемей, серверді күту — әйтпесе EmptyState бірден көрініп, мәлімет жоқ сияқты болады
+        if (isFromCache && docs.length === 0 && !hasCache) {
+          // loading true күйінде қалдыру — skeleton көрсетіледі, серверден келгенде ауысады
+          return;
+        }
+
         setData(docs);
         setError(null);
         setLoading(false);
@@ -232,7 +240,7 @@ export function useCollection<T extends { id: string }>(
         try {
           if (docs.length) {
             localStorage.setItem(cacheKey, JSON.stringify(docs.slice(0, 50)));
-          } else if (!snap.metadata.fromCache) {
+          } else if (!isFromCache) {
             localStorage.removeItem(cacheKey);
           }
         } catch {}
