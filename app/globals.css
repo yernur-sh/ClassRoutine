@@ -48,6 +48,14 @@
   .page-title {
     @apply text-2xl sm:text-3xl font-extrabold text-slate-900;
   }
+  /* Көлденең айналдыру жолағын жасыру (header навигациясы үшін) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* --- Animations --- */

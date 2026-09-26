@@ -6,7 +6,7 @@ export const CLASS_LABEL = '8 «А» сыныбы';
 export const SCHOOL_NAME = 'Мектеп-лицей';
 
 /** Сынып жетекшісінің e-mail-ы. Тек осы адам сынып хабарламасын жариялай алады. */
-export const HOMEROOM_TEACHER_EMAIL = 'ainur@school.kz';
+export const HOMEROOM_TEACHER_EMAIL = 'nurmankyzy83@mail.ru';
 
 /** Мұғалім құқығы бар e-mail-дар (сынып жетекшісі де осында кіреді). */
 export const TEACHER_EMAILS = [
