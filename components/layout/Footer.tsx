@@ -19,13 +19,13 @@ export default function Footer() {
           </span>
           SynypKz — {CLASS_LABEL}
         </p>
-        <div className="flex items-center gap-4">
-          <Link href="/schedule" className="transition hover:text-sky-600">Кесте</Link>
-          <Link href="/class-hour" className="transition hover:text-sky-600">Тәрбие сағаты</Link>
-          <Link href="/ai-assistant" className="transition hover:text-sky-600">ЖИ-көмекші</Link>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Link href="/schedule" className="whitespace-nowrap transition hover:text-sky-600">Кесте</Link>
           {showChat && (
-            <Link href="/communication" className="transition hover:text-sky-600">Хабарламалар</Link>
+            <Link href="/communication" className="whitespace-nowrap transition hover:text-sky-600">Хабарламалар</Link>
           )}
+          <Link href="/class-hour" className="whitespace-nowrap transition hover:text-sky-600">Тәрбие сағаты</Link>
+          <Link href="/ai-assistant" className="whitespace-nowrap transition hover:text-sky-600">ЖИ-көмекші</Link>
           <span className="text-slate-300">© {new Date().getFullYear()}</span>
         </div>
       </div>

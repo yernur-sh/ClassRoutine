@@ -23,15 +23,16 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+// Реті: «Тәрбие сағаты» мен «ЖИ-көмекші» барлық рөлде ең соңында тұрады.
 const NAV = [
   { href: '/', label: 'Басты бет', icon: Home },
   { href: '/schedule', label: 'Кесте', icon: CalendarDays },
-  { href: '/class-hour', label: 'Тәрбие сағаты', icon: HeartHandshake },
-  { href: '/ai-assistant', label: 'ЖИ-көмекші', icon: Sparkles },
   { href: '/communication', label: 'Байланыс', icon: MessageSquare },
   { href: '/achievements', label: 'Жетістіктер', icon: Trophy },
   { href: '/parent-portal', label: 'Ата-ана', icon: Users },
   { href: '/fun-break', label: 'Үзіліс', icon: Smile },
+  { href: '/class-hour', label: 'Тәрбие сағаты', icon: HeartHandshake },
+  { href: '/ai-assistant', label: 'ЖИ-көмекші', icon: Sparkles },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -62,8 +63,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 px-2 pt-2 sm:px-4 sm:pt-3">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/85 px-3 shadow-sm shadow-slate-200/50 backdrop-blur-xl sm:gap-4 sm:px-5">
         {/* Логотип */}
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-sm font-black text-white shadow-md shadow-sky-200 transition-transform group-hover:scale-105">
@@ -76,7 +77,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop навигация */}
-        <nav className="mx-auto hidden items-center gap-1 rounded-2xl bg-slate-100/70 p-1 lg:flex">
+        <nav className="mx-auto hidden min-w-0 flex-nowrap items-center gap-0.5 rounded-2xl bg-slate-100/70 p-1 lg:flex">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
@@ -85,14 +86,14 @@ export default function Header() {
                 href={href}
                 title={label}
                 aria-label={label}
-                className={`flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold transition-all ${
+                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-2 py-2 text-[13px] font-semibold leading-none transition-all ${
                   active
                     ? 'bg-white text-sky-600 shadow-sm'
                     : 'text-slate-500 hover:bg-white/70 hover:text-slate-800'
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">{label}</span>
+                <span className="hidden whitespace-nowrap xl:inline">{label}</span>
               </Link>
             );
           })}
@@ -156,7 +157,7 @@ export default function Header() {
 
       {/* Mobile навигация */}
       {mobileOpen && (
-        <nav className="animate-fade-in border-t border-slate-100 bg-white px-4 py-3 lg:hidden">
+        <nav className="animate-fade-in mx-auto mt-2 max-w-7xl rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm lg:hidden">
           <div className="grid grid-cols-2 gap-2">
             {nav.map(({ href, label, icon: Icon }) => {
               const active = pathname === href;
@@ -164,7 +165,7 @@ export default function Header() {
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+                  className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                     active ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
