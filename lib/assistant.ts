@@ -10,6 +10,7 @@ import {
   lessonsFor,
   todayKey,
   tomorrowKey,
+  nextSchoolDayKey,
   dayLabel,
 } from './schedule-data';
 import { CLASS_HOURS, CLASS_HOUR_SLOT, CLASS_RULES } from './class-hour-data';
@@ -29,6 +30,8 @@ export const QUICK_PROMPTS = [
   'Математикаға қалай дайындалам?',
   'Сабаққа зейін қою үшін кеңес бер',
 ];
+
+const SUNDAY_WORDS = ['жексенб', 'воскресен'];
 
 const DAY_WORDS: { key: DayKey; words: string[] }[] = [
   { key: 'monday', words: ['дүйсенб', 'понедельник'] },
@@ -148,7 +151,16 @@ export function answer(question: string): string {
   if (has(t, 'бүгін', 'бугин', 'сегодня')) return formatDay(todayKey(), 'Бүгін —');
   if (has(t, 'ертең', 'ертен', 'завтра')) {
     const k = tomorrowKey();
+    if (!k || lessonsFor(k).length === 0) {
+      const next = nextSchoolDayKey();
+      return `${formatDay(k, 'Ертең —')}\n\nКелесі оқу күні — ${dayLabel(next)}:\n${formatDay(next)}`;
+    }
     return `${formatDay(k, 'Ертең —')}\n\nСөмкені кешке дайындап қойыңыз 🎒`;
+  }
+
+  if (has(t, ...SUNDAY_WORDS)) {
+    const next = nextSchoolDayKey();
+    return `${formatDay(null)}\n\nКелесі оқу күні — ${dayLabel(next)}.`;
   }
 
   for (const d of DAY_WORDS) {

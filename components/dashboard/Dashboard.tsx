@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useApp, useCollection } from '@/lib/store';
 import { Announcement, Achievement } from '@/lib/types';
 import { CLASS_LABEL, subjectGradient } from '@/lib/config';
-import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor } from '@/lib/schedule-data';
+import { TOTAL_LESSONS, todayKey, dayLabel, lessonsFor, nextSchoolDayKey } from '@/lib/schedule-data';
 import { EmptyState, formatDate } from '@/components/ui';
 import MembersList from '@/components/dashboard/MembersList';
 import { canAccess } from '@/lib/access';
@@ -30,9 +30,11 @@ export default function Dashboard() {
 
   const canChat = canAccess(user?.role, '/communication');
 
-  const day = todayKey();
+  const day = todayKey();                 // жексенбіде — null
   const todayLessons = lessonsFor(day);
-  const label = dayLabel(day);
+  const label = dayLabel(day);            // null → «Жексенбі»
+  const isDayOff = todayLessons.length === 0;
+  const nextDay = nextSchoolDayKey();     // жексенбіні аттап өтеді
 
   const stats = [
     { label: 'Апталық сабақ', value: TOTAL_LESSONS, icon: CalendarDays, color: 'from-sky-400 to-blue-500', href: '/schedule' },
@@ -102,8 +104,8 @@ export default function Dashboard() {
 
           {todayLessons.length === 0 ? (
             <EmptyState
-              title="Бүгін сабақ жоқ"
-              description="Демалыс күні. Апталық кестені «Толық кесте» бөлімінен қараңыз."
+              title={`Бүгін — ${label}, сабақ жоқ`}
+              description={`Демалыс күні. Келесі оқу күні — ${dayLabel(nextDay)}, ${lessonsFor(nextDay).length} сабақ.`}
             />
           ) : (
             <ul className="space-y-2">
