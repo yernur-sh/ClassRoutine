@@ -10,9 +10,10 @@ import {
   lessonsFor,
   todayKey,
   tomorrowKey,
+  nextSchoolDayKey,
   dayLabel,
 } from './schedule-data';
-import { CLASS_HOURS, CLASS_HOUR_SLOT, CLASS_RULES } from './class-hour-data';
+import { currentWeek, nextWeek, directionOf, monthLabel } from './class-hour-data';
 
 export interface ChatMessage {
   id: string;
@@ -24,11 +25,15 @@ export interface ChatMessage {
 export const QUICK_PROMPTS = [
   'Бүгін қандай сабақтар бар?',
   'Ертеңге не дайындау керек?',
-  'Апталық кестені көрсет',
-  'Тәрбие сағатының тақырыбы қандай?',
-  'Математикаға қалай дайындалам?',
-  'Сабаққа зейін қою үшін кеңес бер',
+  'Квадрат теңдеуді қалай шешемін?',
+  'Фотосинтезді қарапайым тілмен түсіндір',
+  'Эссе жазудың құрылымы қандай?',
+  'Present Perfect қашан қолданылады?',
+  'Абай туралы қысқаша айтып бер',
+  'ТЖБ-ға 3 күнде қалай дайындалам?',
 ];
+
+const SUNDAY_WORDS = ['жексенб', 'воскресен'];
 
 const DAY_WORDS: { key: DayKey; words: string[] }[] = [
   { key: 'monday', words: ['дүйсенб', 'понедельник'] },
@@ -135,20 +140,40 @@ export function answer(question: string): string {
 
   // Тәрбие сағаты
   if (has(t, 'тәрбие', 'тарбие', 'классный час', 'класс сағат')) {
-    const next = CLASS_HOURS.find((c) => !c.done);
-    if (!next) return 'Жақын арада жоспарланған тәрбие сағаты жоқ.';
-    return `Кезекті тәрбие сағаты — **«${next.title}»** (${next.date}, ${CLASS_HOUR_SLOT.day}, ${CLASS_HOUR_SLOT.time}, ${CLASS_HOUR_SLOT.room}).\nМақсаты: ${next.goal}\nЖоспары:\n${next.plan.map((p, i) => `${i + 1}. ${p}`).join('\n')}\n\nТолығырақ — «Тәрбие сағаты» бетінде.`;
-  }
+    const cur = currentWeek();
+    const nxt = nextWeek();
+    const fmt = (w: NonNullable<ReturnType<typeof currentWeek>>) =>
+      w.topics
+        .map((x) => `• **${directionOf(x.direction).short}:** ${x.title}\n  ${x.about}`)
+        .join('\n');
 
-  if (has(t, 'ереже', 'тәртіп', 'тартип', 'келісім')) {
-    return `Сынып келісімі:\n${CLASS_RULES.map((r) => `• ${r}`).join('\n')}`;
+    if (cur) {
+      return (
+        `Осы аптаның тәрбие сағаты (${monthLabel(cur.month)}, ${cur.week}-апта):\n${fmt(cur)}` +
+        (nxt ? `\n\nКелесі апта (${monthLabel(nxt.month)}, ${nxt.week}-апта):\n${nxt.topics.map((x) => `• ${x.title}`).join('\n')}` : '') +
+        '\n\nБарлық тақырыптар — «Тәрбие сағаты» бетінде.'
+      );
+    }
+    if (nxt) {
+      return `Кезекті тәрбие сағаты (${monthLabel(nxt.month)}, ${nxt.week}-апта):\n${fmt(nxt)}\n\nТолық жоспар — «Тәрбие сағаты» бетінде.`;
+    }
+    return 'Тәрбие сағатының толық жоспарын «Тәрбие сағаты» бетінен көре аласыз.';
   }
 
   // Күнге байланысты сұрақтар
   if (has(t, 'бүгін', 'бугин', 'сегодня')) return formatDay(todayKey(), 'Бүгін —');
   if (has(t, 'ертең', 'ертен', 'завтра')) {
     const k = tomorrowKey();
+    if (!k || lessonsFor(k).length === 0) {
+      const next = nextSchoolDayKey();
+      return `${formatDay(k, 'Ертең —')}\n\nКелесі оқу күні — ${dayLabel(next)}:\n${formatDay(next)}`;
+    }
     return `${formatDay(k, 'Ертең —')}\n\nСөмкені кешке дайындап қойыңыз 🎒`;
+  }
+
+  if (has(t, ...SUNDAY_WORDS)) {
+    const next = nextSchoolDayKey();
+    return `${formatDay(null)}\n\nКелесі оқу күні — ${dayLabel(next)}.`;
   }
 
   for (const d of DAY_WORDS) {
@@ -175,7 +200,7 @@ export function answer(question: string): string {
       );
       return `${teacherHit} — ${subjects.join(', ')} пәнінен сабақ береді.`;
     }
-    return `Сынып жетекшісі — ${CLASS_HOUR_SLOT.teacher}. Пән мұғалімдерін «Кесте» бетінен көре аласыз.`;
+    return 'Пән мұғалімдерін «Кесте» бетінен көре аласыз.';
   }
 
   // Кабинет / уақыт
