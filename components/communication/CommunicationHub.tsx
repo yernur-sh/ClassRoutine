@@ -8,16 +8,14 @@ import {
   doc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import ChatMessage from '@/components/communication/ChatMessage';
 import { useApp, useCollection } from '@/lib/store';
 import { Announcement, Message } from '@/lib/types';
 import {
-  Avatar,
   EmptyState,
-  Loading,
   Modal,
   PageHeader,
   formatDate,
-  formatDateTime,
 } from '@/components/ui';
 import {
   MessageSquare,
@@ -203,6 +201,10 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
+
   if (!user) {
     return (
       <div className="card animate-fade-up flex h-[400px] flex-col items-center justify-center p-8 text-center">
@@ -224,10 +226,6 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
       </div>
     );
   }
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,30 +262,9 @@ function Chat({ onNeedAuth }: { onNeedAuth: () => void }) {
         ) : messages.length === 0 ? (
           <EmptyState title="Хабарлама жоқ" description="Алғашқы сұрағыңызды жазыңыз." />
         ) : (
-          messages.map((m) => {
-            const own = m.senderId === user?.id;
-            return (
-              <div key={m.id} className={`flex animate-fade-in gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                <Avatar name={m.senderName} />
-                <div className={`max-w-[75%] ${own ? 'items-end text-right' : ''}`}>
-                  <p className="text-[11px] font-semibold text-slate-400">
-                    {m.senderName}
-                    {m.senderRole === 'teacher' && ' · мұғалім'}
-                  </p>
-                  <div
-                    className={`mt-0.5 inline-block rounded-2xl px-3.5 py-2 text-sm ${
-                      own
-                        ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white'
-                        : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {m.content}
-                  </div>
-                  <p className="mt-0.5 text-[10px] text-slate-300">{formatDateTime(m.createdAt)}</p>
-                </div>
-              </div>
-            );
-          })
+          messages.map((message) => (
+            <ChatMessage key={message.id} message={message} currentUserId={user.id} />
+          ))
         )}
         <div ref={bottomRef} />
       </div>
