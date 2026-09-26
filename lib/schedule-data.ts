@@ -97,11 +97,22 @@ export function todayKey(date = new Date()): DayKey | null {
   return i === 0 ? null : DAY_KEYS[i - 1];
 }
 
-/** Ертеңгі күннің кілті (сенбі/жексенбі → дүйсенбі). */
-export function tomorrowKey(date = new Date()): DayKey {
+/** Ертеңгі күннің кілті. Егер ертең жексенбі болса — null (демалыс). */
+export function tomorrowKey(date = new Date()): DayKey | null {
   const d = new Date(date);
   d.setDate(d.getDate() + 1);
-  return todayKey(d) ?? 'monday';
+  return todayKey(d);
+}
+
+/** Келесі оқу күнінің кілті (жексенбіні аттап өтеді). */
+export function nextSchoolDayKey(date = new Date()): DayKey {
+  const d = new Date(date);
+  for (let i = 1; i <= 7; i++) {
+    d.setDate(d.getDate() + 1);
+    const k = todayKey(d);
+    if (k && WEEK_SCHEDULE[k].length > 0) return k;
+  }
+  return 'monday';
 }
 
 /** Күн кілті бойынша сабақтарды алу. */
